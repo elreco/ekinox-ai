@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image from 'next/image'
+import * as FaIcons from 'react-icons/fa'
 
 import { Check, ChevronsUpDown, Lightbulb } from 'lucide-react'
 
@@ -16,27 +16,11 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList
 } from './ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
-function groupModelsByProvider(models: Model[]) {
-  return models
-    .filter(model => model.enabled)
-    .reduce(
-      (groups, model) => {
-        const provider = model.provider
-        if (!groups[provider]) {
-          groups[provider] = []
-        }
-        groups[provider].push(model)
-        return groups
-      },
-      {} as Record<string, Model[]>
-    )
-}
 
 interface ModelSelectorProps {
   models: Model[]
@@ -47,16 +31,30 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   const [value, setValue] = useState('')
 
   useEffect(() => {
+    if (models.length === 0) return // Wait for models to load
+
     const savedModel = getCookie('selectedModel')
     if (savedModel) {
       try {
         const model = JSON.parse(savedModel) as Model
-        setValue(createModelId(model))
+        const modelStillExists = models.find(m => createModelId(m) === createModelId(model))
+        if (modelStillExists) {
+          setValue(createModelId(model))
+          return
+        }
       } catch (e) {
         console.error('Failed to parse saved model:', e)
       }
     }
-  }, [])
+
+    // Set default to "Speed" model if no valid saved model
+    const speedModel = models.find(model => model.name === 'Speed' && model.enabled)
+    if (speedModel) {
+      const speedId = createModelId(speedModel)
+      setValue(speedId)
+      setCookie('selectedModel', JSON.stringify(speedModel))
+    }
+  }, [models])
 
   const handleModelSelect = (id: string) => {
     const newValue = id === value ? '' : id
@@ -75,7 +73,6 @@ export function ModelSelector({ models }: ModelSelectorProps) {
   }
 
   const selectedModel = models.find(model => createModelId(model) === value)
-  const groupedModels = groupModelsByProvider(models)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -88,13 +85,15 @@ export function ModelSelector({ models }: ModelSelectorProps) {
         >
           {selectedModel ? (
             <div className="flex items-center space-x-1">
-              <Image
-                src={`/providers/logos/${selectedModel.providerId}.svg`}
-                alt={selectedModel.provider}
-                width={18}
-                height={18}
-                className="bg-white rounded-full border"
-              />
+              {(() => {
+                const IconComponent = selectedModel.icon ? (FaIcons as any)[selectedModel.icon] : null
+                return IconComponent && (
+                  <IconComponent
+                    className="h-4 w-4"
+                    style={{ color: selectedModel.color || '#6B7280' }}
+                  />
+                )
+              })()}
               <span className="text-xs font-medium">{selectedModel.name}</span>
               {isReasoningModel(selectedModel.id) && (
                 <Lightbulb size={12} className="text-accent-blue-foreground" />
@@ -106,44 +105,55 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="start">
+      <PopoverContent className="w-80 p-0" align="start">
         <Command>
-          <CommandInput placeholder="Search models..." />
           <CommandList>
             <CommandEmpty>No model found.</CommandEmpty>
-            {Object.entries(groupedModels).map(([provider, models]) => (
-              <CommandGroup key={provider} heading={provider}>
-                {models.map(model => {
-                  const modelId = createModelId(model)
-                  return (
-                    <CommandItem
-                      key={modelId}
-                      value={modelId}
-                      onSelect={handleModelSelect}
-                      className="flex justify-between"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <Image
-                          src={`/providers/logos/${model.providerId}.svg`}
-                          alt={model.provider}
-                          width={18}
-                          height={18}
-                          className="bg-white rounded-full border"
-                        />
-                        <span className="text-xs font-medium">
-                          {model.name}
-                        </span>
+            <CommandGroup>
+              {models.filter(model => model.enabled).map(model => {
+                const modelId = createModelId(model)
+                const IconComponent = model.icon ? (FaIcons as any)[model.icon] : null
+                return (
+                  <CommandItem
+                    key={modelId}
+                    value={modelId}
+                    onSelect={handleModelSelect}
+                    className="flex justify-between items-start py-3 px-2 cursor-pointer"
+                  >
+                    <div className="flex items-start space-x-3 flex-1">
+                      <div className="flex items-center flex-shrink-0">
+                        {IconComponent && (
+                          <IconComponent
+                            className="h-4 w-4 mr-2"
+                            style={{ color: model.color || '#6B7280' }}
+                          />
+                        )}
                       </div>
-                      <Check
-                        className={`h-4 w-4 ${
-                          value === modelId ? 'opacity-100' : 'opacity-0'
-                        }`}
-                      />
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
-            ))}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center space-x-1">
+                          <span className="text-sm font-medium">
+                            {model.name}
+                          </span>
+                          {isReasoningModel(model.id) && (
+                            <Lightbulb size={12} className="text-accent-blue-foreground" />
+                          )}
+                        </div>
+                        {model.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                            {model.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <Check
+                      className={`h-4 w-4 flex-shrink-0 ml-2 ${
+                        value === modelId ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  </CommandItem>
+                )
+              })}
+            </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>

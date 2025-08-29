@@ -12,6 +12,9 @@ const DEFAULT_MODEL: Model = {
   id: 'gpt-4o-mini',
   name: 'GPT-4o mini',
   provider: 'OpenAI',
+  description: 'High quality for complex tasks.',
+  icon: 'FaGem',
+  color: '#10B981',
   providerId: 'openai',
   enabled: true,
   toolCallType: 'native'

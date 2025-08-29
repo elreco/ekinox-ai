@@ -1,6 +1,9 @@
 export interface Model {
   id: string
   name: string
+  description: string
+  icon: string
+  color: string
   provider: string
   providerId: string
   enabled: boolean

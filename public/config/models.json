@@ -2,19 +2,25 @@
   "models": [
     {
       "id": "gpt-4.1",
-      "name": "GPT-4.1",
+      "name": "Quality",
+      "description": "High quality for complex tasks.",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
-      "toolCallType": "native"
+      "toolCallType": "native",
+      "icon": "FaGem",
+      "color": "#10B981"
     },
     {
       "id": "gpt-4.1-mini",
-      "name": "GPT-4.1 mini",
+      "name": "Speed",
+      "description": "Snappy responses with impressive capabilities.",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
-      "toolCallType": "native"
+      "toolCallType": "native",
+      "icon": "FaBolt",
+      "color": "#F59E0B"
     },
     {
       "id": "gpt-4.1-nano",
@@ -26,11 +32,14 @@
     },
     {
       "id": "o3-mini",
-      "name": "o3 mini",
+      "name": "Reasoning",
+      "description": "Strong reasoning and problem-solving.",
       "provider": "OpenAI",
       "providerId": "openai",
-      "enabled": false,
-      "toolCallType": "native"
+      "enabled": true,
+      "toolCallType": "native",
+      "icon": "FaBrain",
+      "color": "#8B5CF6"
     },
     {
       "id": "gpt-4o",

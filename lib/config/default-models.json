@@ -2,7 +2,8 @@
   "models": [
     {
       "id": "gpt-4.1",
-      "name": "GPT-4.1",
+      "name": "Quality",
+      "description": "High quality for complex tasks.",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -10,7 +11,8 @@
     },
     {
       "id": "gpt-4.1-mini",
-      "name": "GPT-4.1 mini",
+      "name": "Speed",
+      "description": "Snappy responses with impressive capabilities.",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -19,6 +21,7 @@
     {
       "id": "gpt-4.1-nano",
       "name": "GPT-4.1 nano",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -26,7 +29,8 @@
     },
     {
       "id": "o3-mini",
-      "name": "o3 mini",
+      "name": "Reasoning",
+      "description": "Strong reasoning and problem-solving.",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -35,6 +39,7 @@
     {
       "id": "gpt-4o",
       "name": "GPT-4o",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -43,6 +48,7 @@
     {
       "id": "gpt-4o-mini",
       "name": "GPT-4o mini",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "OpenAI",
       "providerId": "openai",
       "enabled": true,
@@ -51,6 +57,7 @@
     {
       "id": "claude-3-7-sonnet-20250219",
       "name": "Claude 3.7 Sonnet",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Anthropic",
       "providerId": "anthropic",
       "enabled": true,
@@ -59,6 +66,7 @@
     {
       "id": "claude-3-5-sonnet-latest",
       "name": "Claude 3.5 Sonnet",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Anthropic",
       "providerId": "anthropic",
       "enabled": true,
@@ -67,6 +75,7 @@
     {
       "id": "claude-3-5-haiku-20241022",
       "name": "Claude 3.5 Haiku",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Anthropic",
       "providerId": "anthropic",
       "enabled": true,
@@ -75,6 +84,7 @@
     {
       "id": "<AZURE_DEPLOYMENT_NAME>",
       "name": "<AZURE_DEPLOYMENT_NAME>",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Azure",
       "providerId": "azure",
       "enabled": true,
@@ -83,6 +93,7 @@
     {
       "id": "gemini-2.0-flash",
       "name": "Gemini 2.0 Flash",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Google Generative AI",
       "providerId": "google",
       "enabled": true,
@@ -91,6 +102,7 @@
     {
       "id": "gemini-2.0-flash-thinking-exp-01-21",
       "name": "Gemini 2.0 Flash Thinking (Exp)",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Google Generative AI",
       "providerId": "google",
       "enabled": true,
@@ -100,6 +112,7 @@
     {
       "id": "gemini-2.5-pro-exp-03-25",
       "name": "Gemini 2.5 Pro (Exp)",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Google Generative AI",
       "providerId": "google",
       "enabled": true,
@@ -109,6 +122,7 @@
     {
       "id": "accounts/fireworks/models/deepseek-r1",
       "name": "DeepSeek R1",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Fireworks",
       "providerId": "fireworks",
       "enabled": true,
@@ -118,6 +132,7 @@
     {
       "id": "accounts/fireworks/models/llama4-maverick-instruct-basic",
       "name": "Llama 4 Maverick",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Fireworks",
       "providerId": "fireworks",
       "enabled": true,
@@ -127,6 +142,7 @@
     {
       "id": "deepseek-reasoner",
       "name": "DeepSeek R1",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "DeepSeek",
       "providerId": "deepseek",
       "enabled": true,
@@ -136,6 +152,7 @@
     {
       "id": "deepseek-chat",
       "name": "DeepSeek V3",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "DeepSeek",
       "providerId": "deepseek",
       "enabled": true,
@@ -144,6 +161,7 @@
     {
       "id": "deepseek-r1-distill-llama-70b",
       "name": "DeepSeek R1 Distill Llama 70B",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Groq",
       "providerId": "groq",
       "enabled": true,
@@ -153,6 +171,7 @@
     {
       "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
       "name": "Llama 4 Maverick 17B",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Groq",
       "providerId": "groq",
       "enabled": true,
@@ -161,6 +180,7 @@
     {
       "id": "deepseek-r1",
       "name": "DeepSeek R1",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Ollama",
       "providerId": "ollama",
       "enabled": true,
@@ -170,6 +190,7 @@
     {
       "id": "<OLLAMA_MODEL_ID>",
       "name": "<OLLAMA_MODEL_NAME>",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "Ollama",
       "providerId": "ollama",
       "enabled": true,
@@ -179,6 +200,7 @@
     {
       "id": "grok-2-1212",
       "name": "Grok 2",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "xAI",
       "providerId": "xai",
       "enabled": true,
@@ -187,6 +209,7 @@
     {
       "id": "grok-2-vision-1212",
       "name": "Grok 2 Vision",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "xAI",
       "providerId": "xai",
       "enabled": true,
@@ -195,6 +218,7 @@
     {
       "id": "grok-3-beta",
       "name": "Grok 3 Beta",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "xAI",
       "providerId": "xai",
       "enabled": true,
@@ -203,6 +227,7 @@
     {
       "id": "<OPENAI_COMPATIBLE_MODEL>",
       "name": "<OPENAI_COMPATIBLE_MODEL>",
+      "description": "High quality for complex tasks. (Not available in your region)",
       "provider": "OpenAI Compatible",
       "providerId": "openai-compatible",
       "enabled": true,
