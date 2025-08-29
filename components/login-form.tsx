@@ -43,10 +43,10 @@ export function LoginForm({
         password
       })
       if (error) throw error
-      
+
       // Notify chat history to refresh
       window.dispatchEvent(new CustomEvent('chat-history-updated'))
-      
+
       // Redirect to root and refresh to ensure server components get updated session
       router.push('/')
       router.refresh()
@@ -94,7 +94,7 @@ export function LoginForm({
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4">
-            <Button
+            {/* <Button
               variant="outline"
               type="button"
               className="w-full"
@@ -111,7 +111,7 @@ export function LoginForm({
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-muted px-2 text-muted-foreground">Or</span>
               </div>
-            </div>
+            </div> */}
 
             <form onSubmit={handleLogin} className="flex flex-col gap-4">
               <div className="grid gap-2">

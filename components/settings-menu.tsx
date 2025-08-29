@@ -1,10 +1,8 @@
 'use client'
 
-import Link from 'next/link'
 
 import {
   Link2,
-  LogIn,
   Palette,
   Settings2 // Or EllipsisVertical, etc.
 } from 'lucide-react'
@@ -13,8 +11,6 @@ import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -24,7 +20,7 @@ import {
 import { ExternalLinkItems } from './external-link-items'
 import { ThemeMenuItems } from './theme-menu-items'
 
-export default function GuestMenu() {
+export default function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,13 +30,6 @@ export default function GuestMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuItem asChild>
-          <Link href="/auth/login">
-            <LogIn className="mr-2 h-4 w-4" />
-            <span>Sign In</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Palette className="mr-2 h-4 w-4" />

@@ -21,8 +21,8 @@ import {
 import { ChatHistorySection } from './sidebar/chat-history-section'
 import { ChatHistorySkeleton } from './sidebar/chat-history-skeleton'
 import { NavUser } from './sidebar/nav-user'
+import { Button } from './ui/button'
 import { IconLogo } from './ui/icons'
-import GuestMenu from './guest-menu'
 
 interface AppSidebarProps {
   user: User | null
@@ -56,7 +56,18 @@ export default function AppSidebar({ user }: AppSidebarProps) {
         </div>
       </SidebarContent>
       <SidebarFooter>
-        {user ? <NavUser user={user} /> : <GuestMenu />}
+        {user ? (
+          <NavUser user={user} />
+        ) : (
+          <div className="flex flex-col gap-2 p-2">
+            <Button asChild className="w-full">
+              <Link href="/auth/login">Login</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/auth/signup">Sign Up</Link>
+            </Button>
+          </div>
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

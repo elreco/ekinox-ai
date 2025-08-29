@@ -10,8 +10,7 @@ import { cn } from '@/lib/utils'
 import { useSidebar } from '@/components/ui/sidebar'
 
 // import { Button } from './ui/button' // No longer needed directly here for Sign In button
-import GuestMenu from './guest-menu' // Import the new GuestMenu component
-import UserMenu from './user-menu'
+import SettingsMenu from './settings-menu'
 
 interface HeaderProps {
   user: User | null
@@ -31,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
       <div></div>
 
       <div className="flex items-center gap-2">
-        {user ? <UserMenu user={user} /> : <GuestMenu />}
+      <SettingsMenu />
       </div>
     </header>
   )
