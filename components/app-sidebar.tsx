@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 
+import { User } from '@supabase/supabase-js'
 import { Plus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -18,9 +20,15 @@ import {
 
 import { ChatHistorySection } from './sidebar/chat-history-section'
 import { ChatHistorySkeleton } from './sidebar/chat-history-skeleton'
+import { NavUser } from './sidebar/nav-user'
 import { IconLogo } from './ui/icons'
+import GuestMenu from './guest-menu'
 
-export default function AppSidebar() {
+interface AppSidebarProps {
+  user: User | null
+}
+
+export default function AppSidebar({ user }: AppSidebarProps) {
   return (
     <Sidebar side="left" variant="sidebar" collapsible="offcanvas">
       <SidebarHeader className="flex flex-row justify-between items-center">
@@ -47,6 +55,9 @@ export default function AppSidebar() {
           </Suspense>
         </div>
       </SidebarContent>
+      <SidebarFooter>
+        {user ? <NavUser user={user} /> : <GuestMenu />}
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   )
