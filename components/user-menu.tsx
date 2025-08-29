@@ -52,6 +52,10 @@ export default function UserMenu({ user }: UserMenuProps) {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    
+    // Notify chat history to refresh
+    window.dispatchEvent(new CustomEvent('chat-history-updated'))
+    
     router.push('/')
     router.refresh()
   }

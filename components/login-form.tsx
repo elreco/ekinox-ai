@@ -43,6 +43,10 @@ export function LoginForm({
         password
       })
       if (error) throw error
+      
+      // Notify chat history to refresh
+      window.dispatchEvent(new CustomEvent('chat-history-updated'))
+      
       // Redirect to root and refresh to ensure server components get updated session
       router.push('/')
       router.refresh()
