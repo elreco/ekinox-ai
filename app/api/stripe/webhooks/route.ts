@@ -97,6 +97,24 @@ async function handleCheckoutSessionCompleted(
   // Retrieve the subscription to get more details
   const subscription = await stripe.subscriptions.retrieve(subscriptionId)
   const priceId = subscription.items.data[0].price.id
+
+  console.log('Subscription data:', {
+    id: subscription.id,
+    status: subscription.status,
+    start_date: subscription.start_date,
+    items: subscription.items.data[0]
+  })
+
+  // Les périodes sont dans l'item de subscription, pas dans l'objet principal
+  const subscriptionItem = subscription.items.data[0]
+  const currentPeriodStart = subscriptionItem.current_period_start
+    ? new Date(subscriptionItem.current_period_start * 1000)
+    : new Date(subscription.start_date * 1000)
+
+  const currentPeriodEnd = subscriptionItem.current_period_end
+    ? new Date(subscriptionItem.current_period_end * 1000)
+    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+
   // Upsert user subscription record
   const { error } = await supabase.from('user_subscriptions').upsert({
     user_id: userId,
@@ -104,13 +122,9 @@ async function handleCheckoutSessionCompleted(
     stripe_subscription_id: subscriptionId,
     stripe_price_id: priceId,
     status: subscription.status,
-    current_period_start: new Date(
-      subscription.items.data[0].current_period_start * 1000
-    ),
-    current_period_end: new Date(
-      subscription.items.data[0].current_period_end * 1000
-    ),
-    cancel_at_period_end: subscription.cancel_at_period_end,
+    current_period_start: currentPeriodStart,
+    current_period_end: currentPeriodEnd,
+    cancel_at_period_end: subscription.cancel_at_period_end || false,
     created_at: new Date(),
     updated_at: new Date()
   })
@@ -131,18 +145,20 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   const userId = customer.metadata?.userId
   if (!userId) return
 
+  const subscriptionItem = subscription.items.data[0]
+
   const { error } = await supabase.from('user_subscriptions').upsert({
     user_id: userId,
     stripe_customer_id: customerId,
     stripe_subscription_id: subscription.id,
     stripe_price_id: priceId,
     status: subscription.status,
-    current_period_start: new Date(
-      subscription.items.data[0].current_period_start * 1000
-    ),
-    current_period_end: new Date(
-      subscription.items.data[0].current_period_end * 1000
-    ),
+    current_period_start: subscriptionItem.current_period_start
+      ? new Date(subscriptionItem.current_period_start * 1000)
+      : new Date(subscription.start_date * 1000),
+    current_period_end: subscriptionItem.current_period_end
+      ? new Date(subscriptionItem.current_period_end * 1000)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     cancel_at_period_end: subscription.cancel_at_period_end,
     created_at: new Date(),
     updated_at: new Date()
@@ -155,18 +171,19 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const priceId = subscription.items.data[0].price.id
+  const subscriptionItem = subscription.items.data[0]
 
   const { error } = await supabase
     .from('user_subscriptions')
     .update({
       stripe_price_id: priceId,
       status: subscription.status,
-      current_period_start: new Date(
-        subscription.items.data[0].current_period_start * 1000
-      ),
-      current_period_end: new Date(
-        subscription.items.data[0].current_period_end * 1000
-      ),
+      current_period_start: subscriptionItem.current_period_start
+        ? new Date(subscriptionItem.current_period_start * 1000)
+        : new Date(subscription.start_date * 1000),
+      current_period_end: subscriptionItem.current_period_end
+        ? new Date(subscriptionItem.current_period_end * 1000)
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       cancel_at_period_end: subscription.cancel_at_period_end,
       updated_at: new Date()
     })

@@ -1,9 +1,6 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(bun lint:*)",
-      "Bash(bun:*)"
-    ],
+    "allow": ["Bash(bun lint:*)", "Bash(bun:*)"],
     "deny": [],
     "ask": []
   }

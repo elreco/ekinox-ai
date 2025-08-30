@@ -20,15 +20,23 @@ export function PricingSection() {
       return
     }
 
+    // Empêcher la souscription si l'utilisateur a déjà un abonnement actif
+    if (isSubscribed) {
+      toast.error(
+        'You already have an active subscription. Please manage your current subscription instead.'
+      )
+      return
+    }
+
     setLoading(priceId)
 
     try {
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId })
       })
 
       const data = await response.json()
@@ -43,7 +51,7 @@ export function PricingSection() {
       }
 
       const { error } = await stripe.redirectToCheckout({
-        sessionId: data.sessionId,
+        sessionId: data.sessionId
       })
 
       if (error) {
@@ -51,7 +59,9 @@ export function PricingSection() {
       }
     } catch (error) {
       console.error('Error:', error)
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      toast.error(
+        error instanceof Error ? error.message : 'Something went wrong'
+      )
     } finally {
       setLoading(null)
     }
@@ -59,7 +69,11 @@ export function PricingSection() {
 
   const getCurrentPlanId = () => {
     if (!isSubscribed) return 'free'
-    return SUBSCRIPTION_PLANS.find(plan => plan.priceId === subscription?.stripePriceId)?.id || 'free'
+    return (
+      SUBSCRIPTION_PLANS.find(
+        plan => plan.priceId === subscription?.stripe_price_id
+      )?.id || 'free'
+    )
   }
 
   return (
@@ -75,13 +89,14 @@ export function PricingSection() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {SUBSCRIPTION_PLANS.map((plan) => (
+          {SUBSCRIPTION_PLANS.map(plan => (
             <PricingCard
               key={plan.id}
               plan={plan}
               currentPlan={getCurrentPlanId() === plan.id}
               onSubscribe={() => handleSubscribe(plan.priceId)}
               loading={loading === plan.priceId}
+              hasActiveSubscription={isSubscribed}
             />
           ))}
         </div>

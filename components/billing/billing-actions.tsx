@@ -7,7 +7,13 @@ import { toast } from 'sonner'
 import { useSubscription } from '@/lib/hooks/use-subscription'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 import { Icons } from '@/components/ui/icons'
 
 export function BillingActions() {
@@ -26,8 +32,8 @@ export function BillingActions() {
       const response = await fetch('/api/stripe/portal', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'
+        }
       })
 
       const data = await response.json()
@@ -39,7 +45,9 @@ export function BillingActions() {
       window.open(data.url, '_blank')
     } catch (error) {
       console.error('Error:', error)
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      toast.error(
+        error instanceof Error ? error.message : 'Something went wrong'
+      )
     } finally {
       setLoading(false)
     }

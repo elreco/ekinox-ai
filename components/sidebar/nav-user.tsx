@@ -110,18 +110,14 @@ export function NavUser({ user }: UserMenuProps) {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/pricing">
-                Pricing
-              </Link>
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/pricing">Pricing</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard/billing">
-                Billing
-              </Link>
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/dashboard/billing">Billing</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <MdLogout className="mr-2 h-4 w-4" />
               Log out
             </DropdownMenuItem>

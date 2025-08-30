@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-
 import type { UserSubscription } from '@/lib/stripe/types'
+import { createClient } from '@/lib/supabase/client'
 
 export function useSubscription() {
   const [subscription, setSubscription] = useState<UserSubscription | null>(
@@ -10,7 +9,7 @@ export function useSubscription() {
   )
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchSubscription() {
@@ -24,17 +23,31 @@ export function useSubscription() {
           return
         }
 
-        const { data, error } = await supabase
-          .from('user_subscription_status')
+        console.log('Fetching subscription for user:', user.id)
+
+        // Essayer d'abord sans .single() pour debug
+        const { data: allData, error: allError } = await supabase
+          .from('user_subscriptions')
           .select('*')
           .eq('user_id', user.id)
-          .single()
 
-        if (error && error.code !== 'PGRST116') {
-          setError(error.message)
-        } else {
-          setSubscription(data)
+        console.log('All subscriptions query:', { allData, allError })
+
+        if (allError) {
+          console.error('Subscription fetch error:', allError)
+          setError(allError.message)
+          return
         }
+
+        // Prendre la première subscription si elle existe
+        const subscription = allData && allData.length > 0 ? allData[0] : null
+
+        console.log('Selected subscription:', subscription)
+        console.log(
+          'Environment PRICE_ID:',
+          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
+        )
+        setSubscription(subscription)
       } catch (err) {
         setError('Failed to fetch subscription')
       } finally {
@@ -68,7 +81,15 @@ export function useSubscription() {
   const isActive =
     subscription?.status === 'active' || subscription?.status === 'trialing'
   const isPro =
-    subscription?.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
+    subscription?.stripe_price_id ===
+    process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
+
+  console.log('useSubscription debug:', {
+    subscription: !!subscription,
+    status: subscription?.status,
+    isActive,
+    isSubscribed: !!subscription && isActive
+  })
 
   return {
     subscription,

@@ -12,5 +12,5 @@ export default function PricingPage() {
 
 export const metadata = {
   title: 'Pricing - Ekinox AI',
-  description: 'Choose the perfect plan for your AI-powered search needs',
+  description: 'Choose the perfect plan for your AI-powered search needs'
 }

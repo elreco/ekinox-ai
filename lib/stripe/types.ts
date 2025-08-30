@@ -14,16 +14,16 @@ export interface SubscriptionPlan {
 
 export interface UserSubscription {
   id: string
-  userId: string
-  stripeCustomerId: string
-  stripeSubscriptionId: string
-  stripePriceId: string
+  user_id: string
+  stripe_customer_id: string
+  stripe_subscription_id: string
+  stripe_price_id: string
   status: Stripe.Subscription.Status
-  currentPeriodStart: Date
-  currentPeriodEnd: Date
-  cancelAtPeriodEnd: boolean
-  createdAt: Date
-  updatedAt: Date
+  current_period_start: string
+  current_period_end: string
+  cancel_at_period_end: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface CreateCheckoutSessionParams {

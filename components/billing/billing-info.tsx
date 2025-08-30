@@ -5,7 +5,13 @@ import { SUBSCRIPTION_PLANS } from '@/lib/stripe/types'
 import { formatPrice, isSubscriptionActive } from '@/lib/stripe/utils'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card'
 
 interface BillingInfoProps {
   subscription: UserSubscription | null
@@ -27,14 +33,10 @@ export function BillingInfo({ subscription }: BillingInfoProps) {
         <CardContent>
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              • 10 searches per month
+              • Unlimited searches
             </p>
-            <p className="text-sm text-muted-foreground">
-              • Basic AI models
-            </p>
-            <p className="text-sm text-muted-foreground">
-              • Community support
-            </p>
+            <p className="text-sm text-muted-foreground">• Speed model only</p>
+            <p className="text-sm text-muted-foreground">• Community support</p>
           </div>
         </CardContent>
       </Card>
@@ -42,7 +44,7 @@ export function BillingInfo({ subscription }: BillingInfoProps) {
   }
 
   const currentPlan = SUBSCRIPTION_PLANS.find(
-    plan => plan.priceId === subscription.stripePriceId
+    plan => plan.priceId === subscription.stripe_price_id
   )
 
   const isActive = isSubscriptionActive(subscription.status)
@@ -57,9 +59,7 @@ export function BillingInfo({ subscription }: BillingInfoProps) {
             {currentPlan?.name || 'Unknown Plan'}
           </Badge>
         </CardTitle>
-        <CardDescription>
-          Status: {subscription.status}
-        </CardDescription>
+        <CardDescription>Status: {subscription.status}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -67,10 +67,9 @@ export function BillingInfo({ subscription }: BillingInfoProps) {
             <div>
               <p className="text-sm font-medium">Price</p>
               <p className="text-sm text-muted-foreground">
-                {currentPlan ? 
-                  `${formatPrice(currentPlan.price, currentPlan.currency)}/${currentPlan.interval}` : 
-                  'Unknown'
-                }
+                {currentPlan
+                  ? `${formatPrice(currentPlan.price, currentPlan.currency)}/${currentPlan.interval}`
+                  : 'Unknown'}
               </p>
             </div>
             <div>
@@ -85,17 +84,28 @@ export function BillingInfo({ subscription }: BillingInfoProps) {
             <div>
               <p className="text-sm font-medium">Current Period</p>
               <p className="text-sm text-muted-foreground">
-                {new Date(subscription.currentPeriodStart).toLocaleDateString()} - {' '}
-                {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                {subscription.current_period_start &&
+                subscription.current_period_end ? (
+                  <>
+                    {new Date(
+                      subscription.current_period_start
+                    ).toLocaleDateString()}{' '}
+                    -{' '}
+                    {new Date(
+                      subscription.current_period_end
+                    ).toLocaleDateString()}
+                  </>
+                ) : (
+                  'Period information unavailable'
+                )}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium">Renewal</p>
               <p className="text-sm text-muted-foreground">
-                {subscription.cancelAtPeriodEnd 
-                  ? 'Canceling at period end' 
-                  : 'Auto-renew enabled'
-                }
+                {subscription.cancel_at_period_end
+                  ? 'Canceling at period end'
+                  : 'Auto-renew enabled'}
               </p>
             </div>
           </div>

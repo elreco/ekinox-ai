@@ -13,12 +13,13 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
 }
 
 // Only initialize Stripe on server side
-export const stripe = typeof window === 'undefined' 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2025-08-27.basil',
-      typescript: true
-    })
-  : null as any as Stripe
+export const stripe =
+  typeof window === 'undefined'
+    ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
+        apiVersion: '2025-08-27.basil',
+        typescript: true
+      })
+    : (null as any as Stripe)
 
 let stripePromise: Promise<StripeJS | null>
 
@@ -38,7 +39,7 @@ export const config = {
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       prices: {
         pro: process.env.STRIPE_PRICE_ID_PRO!
-      },
+      }
     }),
     // Client and server configs
     testMode: process.env.STRIPE_TEST_MODE === 'true'

@@ -13,7 +13,10 @@ import { PricingSection } from '@/components/pricing/pricing-section'
 export default async function BillingPage() {
   const supabase = await createClient()
 
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error
+  } = await supabase.auth.getUser()
 
   if (error || !user) {
     redirect('/auth/login')
@@ -22,19 +25,21 @@ export default async function BillingPage() {
   return (
     <div className="h-full overflow-y-auto">
       <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Billing & Subscription</h1>
-        <p className="text-muted-foreground">
-          Manage your subscription, view usage, and billing information
-        </p>
-      </div>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Billing & Subscription</h1>
+          <p className="text-muted-foreground">
+            Manage your subscription, view usage, and billing information
+          </p>
+        </div>
 
-      <Suspense fallback={<BillingSkeleton />}>
-        <BillingContent userId={user.id} />
-      </Suspense>
+        <Suspense fallback={<BillingSkeleton />}>
+          <BillingContent userId={user.id} />
+        </Suspense>
 
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6 text-center">Upgrade Your Plan</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">
+            Upgrade Your Plan
+          </h2>
           <PricingSection />
         </div>
       </div>
