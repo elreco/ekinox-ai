@@ -119,10 +119,9 @@ export function ChatPanel({
     >
       {messages.length === 0 && (
         <div className="mb-10 flex flex-col items-center gap-4">
-          <IconLogo className="size-12 text-primary-foreground" />
-          <p className="text-center text-3xl font-semibold">
-            How can I help you today?
-          </p>
+          <div className="relative flex justify-center items-center space-x-2">
+            <IconLogo className="size-12 text-primary-foreground" />
+          </div>
         </div>
       )}
       <form
@@ -143,7 +142,7 @@ export function ChatPanel({
           </Button>
         )}
 
-        <div className="relative flex flex-col w-full gap-2 bg-muted rounded-3xl border border-input">
+        <div className="relative flex flex-col w-full gap-2 rounded-3xl bg-muted border border-foreground/10">
           <Textarea
             ref={inputRef}
             name="input"
@@ -152,7 +151,7 @@ export function ChatPanel({
             tabIndex={0}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
-            placeholder="Ask a question..."
+            placeholder="Ask any question"
             spellCheck={false}
             value={input}
             disabled={isLoading || isToolInvocationInProgress()}
@@ -224,7 +223,11 @@ export function ChatPanel({
                 target: { value: message }
               } as React.ChangeEvent<HTMLTextAreaElement>)
             }}
-            className={cn(showEmptyScreen ? 'visible' : 'invisible')}
+            className={cn(
+              showEmptyScreen
+                ? 'opacity-100 transition-all duration-300'
+                : 'opacity-0 transition-all duration-300'
+            )}
           />
         )}
       </form>
