@@ -69,9 +69,6 @@ export function useSubscription() {
     subscription?.status === 'active' || subscription?.status === 'trialing'
   const isPro =
     subscription?.stripePriceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
-  const isBasic =
-    subscription?.stripePriceId ===
-    process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_BASIC
 
   return {
     subscription,
@@ -79,7 +76,6 @@ export function useSubscription() {
     error,
     isActive,
     isPro,
-    isBasic,
     isSubscribed: !!subscription && isActive
   }
 }

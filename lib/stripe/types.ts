@@ -71,7 +71,7 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     price: 20,
     currency: 'usd',
     interval: 'month',
-    priceId: process.env.STRIPE_PRICE_ID_PRO || '',
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO || '',
     popular: true,
     features: [
       'Unlimited searches',

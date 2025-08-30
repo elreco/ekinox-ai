@@ -37,7 +37,6 @@ export const config = {
       secretKey: process.env.STRIPE_SECRET_KEY!,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
       prices: {
-        basic: process.env.STRIPE_PRICE_ID_BASIC!,
         pro: process.env.STRIPE_PRICE_ID_PRO!
       },
     }),
