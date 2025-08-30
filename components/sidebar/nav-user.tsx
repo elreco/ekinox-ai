@@ -2,6 +2,7 @@
 
 import { BsThreeDots } from 'react-icons/bs'
 import { MdLogout } from 'react-icons/md'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { User } from '@supabase/supabase-js'
@@ -108,6 +109,17 @@ export function NavUser({ user }: UserMenuProps) {
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/pricing">
+                Pricing
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/billing">
+                Billing
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <MdLogout className="mr-2 h-4 w-4" />

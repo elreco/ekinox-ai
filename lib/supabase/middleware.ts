@@ -45,7 +45,8 @@ export async function updateSession(request: NextRequest) {
     '/', // Root path
     '/auth', // Auth-related pages
     '/share', // Share pages
-    '/api' // API routes
+    '/api', // API routes
+    '/pricing' // Pricing page should be public
     // Add other public paths here if needed
   ]
 
