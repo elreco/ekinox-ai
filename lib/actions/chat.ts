@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
+import { getCurrentUserId } from '@/lib/auth/get-current-user'
 import { getRedisClient, RedisWrapper } from '@/lib/redis/config'
 import { type Chat } from '@/lib/types'
 
@@ -145,10 +146,15 @@ export async function getChat(id: string, userId: string = 'anonymous') {
 }
 
 export async function clearChats(
-  userId: string = 'anonymous'
+  userId?: string | null
 ): Promise<{ error?: string }> {
+  const finalUserId = userId || await getCurrentUserId()
+  if (!finalUserId) {
+    return { error: 'User not authenticated' }
+  }
+  
   const redis = await getRedis()
-  const userChatKey = getUserChatKey(userId)
+  const userChatKey = getUserChatKey(finalUserId)
   const chats = await redis.zrange(userChatKey, 0, -1)
   if (!chats.length) {
     return { error: 'No chats to clear' }
