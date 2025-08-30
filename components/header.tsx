@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ user }) => {
       <div></div>
 
       <div className="flex items-center gap-2">
-      <SettingsMenu />
+        <SettingsMenu />
       </div>
     </header>
   )

@@ -1,18 +1,14 @@
-"use client"
+'use client'
 
-import { BsThreeDots } from "react-icons/bs";
-import { MdLogout } from "react-icons/md";
-import { useRouter } from 'next/navigation';
+import { BsThreeDots } from 'react-icons/bs'
+import { MdLogout } from 'react-icons/md'
+import { useRouter } from 'next/navigation'
 
-import { User } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js'
 
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client'
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,13 +16,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+  useSidebar
+} from '@/components/ui/sidebar'
 
 interface UserMenuProps {
   user: User
@@ -77,12 +73,14 @@ export function NavUser({ user }: UserMenuProps) {
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={avatarUrl} alt={userName} />
-                <AvatarFallback className="rounded-lg">{getInitials(userName, user.email)}</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {getInitials(userName, user.email)}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{userName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                {user.email}
+                  {user.email}
                 </span>
               </div>
               <BsThreeDots className="ml-auto size-4" />
@@ -90,7 +88,7 @@ export function NavUser({ user }: UserMenuProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -98,7 +96,9 @@ export function NavUser({ user }: UserMenuProps) {
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={avatarUrl} alt={userName} />
-                  <AvatarFallback className="rounded-lg">{getInitials(userName, user.email)}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(userName, user.email)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{userName}</span>

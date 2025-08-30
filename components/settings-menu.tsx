@@ -1,6 +1,5 @@
 'use client'
 
-
 import {
   Link2,
   Palette,
