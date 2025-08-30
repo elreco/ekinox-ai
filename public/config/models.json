@@ -1,17 +1,6 @@
 {
   "models": [
     {
-      "id": "gpt-4.1",
-      "name": "Quality",
-      "description": "High quality for complex tasks.",
-      "provider": "OpenAI",
-      "providerId": "openai",
-      "enabled": true,
-      "toolCallType": "native",
-      "icon": "FaGem",
-      "color": "#10B981"
-    },
-    {
       "id": "gpt-4.1-mini",
       "name": "Speed",
       "description": "Snappy responses with impressive capabilities.",
@@ -21,6 +10,17 @@
       "toolCallType": "native",
       "icon": "FaBolt",
       "color": "#F59E0B"
+    },
+    {
+      "id": "gpt-4.1",
+      "name": "Quality",
+      "description": "High quality for complex tasks.",
+      "provider": "OpenAI",
+      "providerId": "openai",
+      "enabled": true,
+      "toolCallType": "native",
+      "icon": "FaGem",
+      "color": "#10B981"
     },
     {
       "id": "gpt-4.1-nano",
