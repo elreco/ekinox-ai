@@ -9,7 +9,8 @@
       "enabled": true,
       "toolCallType": "native",
       "icon": "FaBolt",
-      "color": "#F59E0B"
+      "color": "#F59E0B",
+      "free": true
     },
     {
       "id": "gpt-4.1",

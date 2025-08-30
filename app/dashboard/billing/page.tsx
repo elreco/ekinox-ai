@@ -52,41 +52,19 @@ async function BillingContent({ userId }: { userId: string }) {
     .eq('user_id', userId)
     .single()
 
-  // In a real app, you'd fetch usage stats from your database
-  // For now, we'll use mock data
-  const searchesUsed = 25
-
   return (
-    <div className="grid lg:grid-cols-3 gap-6 mb-8">
-      <div className="lg:col-span-2">
-        <BillingInfo subscription={subscription} />
-      </div>
-      <div className="space-y-6">
-        <BillingActions />
-        <div className="p-4 border rounded-lg">
-          <h3 className="font-semibold mb-2">Usage Statistics</h3>
-          <p className="text-sm text-muted-foreground">
-            Searches used: {searchesUsed}
-          </p>
-        </div>
-      </div>
+    <div className="grid lg:grid-cols-2 gap-6 mb-8">
+      <BillingInfo subscription={subscription} />
+      <BillingActions />
     </div>
   )
 }
 
 function BillingSkeleton() {
   return (
-    <div className="grid lg:grid-cols-3 gap-6 mb-8">
-      <div className="lg:col-span-2">
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
+    <div className="grid lg:grid-cols-2 gap-6 mb-8">
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-32 w-full" />
     </div>
   )
 }

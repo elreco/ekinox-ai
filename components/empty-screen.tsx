@@ -1,6 +1,4 @@
-import Link from 'next/link'
-
-import { ArrowRight, Crown } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
@@ -47,21 +45,6 @@ export function EmptyScreen({
               {message.heading}
             </Button>
           ))}
-        </div>
-        
-        <div className="mt-6 p-4 border border-primary/20 rounded-lg bg-primary/5">
-          <div className="flex items-center gap-2 mb-2">
-            <Crown className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold text-primary">Upgrade to Pro</h3>
-          </div>
-          <p className="text-sm text-muted-foreground mb-3">
-            Get unlimited searches, priority support, and advanced features.
-          </p>
-          <Button asChild size="sm" className="w-full">
-            <Link href="/pricing">
-              View Plans
-            </Link>
-          </Button>
         </div>
       </div>
     </div>

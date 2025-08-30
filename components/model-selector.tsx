@@ -2,9 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import * as FaIcons from 'react-icons/fa'
+import Link from 'next/link'
 
-import { Check, ChevronsUpDown, Lightbulb } from 'lucide-react'
+import { Check, ChevronsUpDown, Crown, Lightbulb } from 'lucide-react'
+import { toast } from 'sonner'
 
+import { useSubscription } from '@/lib/hooks/use-subscription'
 import { Model } from '@/lib/types/models'
 import { getCookie, setCookie } from '@/lib/utils/cookies'
 import { isReasoningModel } from '@/lib/utils/registry'
@@ -28,6 +31,9 @@ interface ModelSelectorProps {
 export function ModelSelector({ models }: ModelSelectorProps) {
   const [open, setOpen] = useState(false)
   const [value, setValue] = useState('')
+  const { isSubscribed } = useSubscription()
+  
+  const enabledModels = models.filter(model => model.enabled)
 
   useEffect(() => {
     if (models.length === 0) return // Wait for models to load
@@ -36,10 +42,11 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     if (savedModel) {
       try {
         const model = JSON.parse(savedModel) as Model
-        const modelStillExists = models.find(
+        const modelStillExists = enabledModels.find(
           m => createModelId(m) === createModelId(model)
         )
-        if (modelStillExists) {
+        // Only set if user has access to this model
+        if (modelStillExists && (isSubscribed || model.free)) {
           setValue(createModelId(model))
           return
         }
@@ -49,21 +56,27 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     }
 
     // Set default to "Speed" model if no valid saved model
-    const speedModel = models.find(
-      model => model.name === 'Speed' && model.enabled
+    const speedModel = enabledModels.find(
+      model => model.name === 'Speed'
     )
     if (speedModel) {
       const speedId = createModelId(speedModel)
       setValue(speedId)
       setCookie('selectedModel', JSON.stringify(speedModel))
     }
-  }, [models])
+  }, [models, enabledModels, isSubscribed])
 
-  const handleModelSelect = (id: string) => {
+  const handleModelSelect = (id: string, model: Model) => {
+    // Check if user can select this model
+    if (!isSubscribed && !model.free) {
+      toast.error('This model requires a Pro subscription. Upgrade to access all models!')
+      return
+    }
+
     const newValue = id === value ? '' : id
     setValue(newValue)
 
-    const selectedModel = models.find(
+    const selectedModel = enabledModels.find(
       model => createModelId(model) === newValue
     )
     if (selectedModel) {
@@ -75,7 +88,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
     setOpen(false)
   }
 
-  const selectedModel = models.find(model => createModelId(model) === value)
+  const selectedModel = enabledModels.find(model => createModelId(model) === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -117,19 +130,23 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           <CommandList>
             <CommandEmpty>No model found.</CommandEmpty>
             <CommandGroup>
-              {models
-                .filter(model => model.enabled)
-                .map(model => {
+              {enabledModels.map(model => {
                   const modelId = createModelId(model)
                   const IconComponent = model.icon
                     ? (FaIcons as any)[model.icon]
                     : null
+                  const isProModel = !model.free
+                  const canSelect = isSubscribed || model.free
+                  
                   return (
                     <CommandItem
                       key={modelId}
                       value={modelId}
-                      onSelect={handleModelSelect}
-                      className="flex justify-between items-start py-3 px-2 cursor-pointer"
+                      onSelect={() => handleModelSelect(modelId, model)}
+                      className={`flex justify-between items-start py-3 px-2 ${
+                        canSelect ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+                      }`}
+                      disabled={!canSelect}
                     >
                       <div className="flex items-start space-x-3 flex-1">
                         <div className="flex items-center flex-shrink-0">
@@ -145,6 +162,9 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                             <span className="text-sm font-medium">
                               {model.name}
                             </span>
+                            {isProModel && (
+                              <Crown size={12} className="text-amber-500" />
+                            )}
                             {isReasoningModel(model.id) && (
                               <Lightbulb
                                 size={12}
@@ -155,6 +175,11 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                           {model.description && (
                             <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                               {model.description}
+                            </p>
+                          )}
+                          {isProModel && !isSubscribed && (
+                            <p className="text-xs text-amber-600 mt-1 font-medium">
+                              Pro subscription required
                             </p>
                           )}
                         </div>
@@ -168,6 +193,22 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                   )
                 })}
             </CommandGroup>
+            {!isSubscribed && (
+              <div className="border-t p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-semibold">Unlock All Models</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Upgrade to Pro for access to all premium AI models including Quality and Reasoning.
+                </p>
+                <Button asChild size="sm" className="w-full">
+                  <Link href="/pricing">
+                    Upgrade to Pro - $20/month
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

@@ -62,28 +62,13 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     currency: 'usd',
     interval: 'month',
     priceId: '',
-    features: ['10 searches per month', 'Basic AI models', 'Community support']
-  },
-  {
-    id: 'basic',
-    name: 'Basic',
-    description: 'For personal use',
-    price: 9.99,
-    currency: 'usd',
-    interval: 'month',
-    priceId: process.env.STRIPE_PRICE_ID_BASIC || '',
-    features: [
-      '100 searches per month',
-      'All AI models',
-      'Conversation history',
-      'Email support'
-    ]
+    features: ['Unlimited searches', 'Speed model only', 'Community support']
   },
   {
     id: 'pro',
     name: 'Pro',
-    description: 'For professionals',
-    price: 29.99,
+    description: 'For professionals and power users',
+    price: 20,
     currency: 'usd',
     interval: 'month',
     priceId: process.env.STRIPE_PRICE_ID_PRO || '',
@@ -91,9 +76,8 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     features: [
       'Unlimited searches',
       'All premium AI models',
-      'Export results',
-      'API integrations',
-      'Priority support'
+      'Priority support',
+      'All models'
     ]
   }
 ]
