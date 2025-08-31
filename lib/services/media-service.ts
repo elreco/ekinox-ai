@@ -1,6 +1,125 @@
 import { SearchResults } from '@/lib/types'
 
-export type MediaType = 'article' | 'video' | 'research' | 'podcast' | 'report' | 'blog'
+// Country name mapping
+function getCountryName(countryCode: string): string {
+  const countryNames: Record<string, string> = {
+    US: 'United States',
+    GB: 'United Kingdom', 
+    CA: 'Canada',
+    AU: 'Australia',
+    FR: 'France',
+    DE: 'Germany',
+    ES: 'Spain',
+    IT: 'Italy',
+    BR: 'Brazil',
+    MX: 'Mexico',
+    AR: 'Argentina',
+    JP: 'Japan',
+    KR: 'South Korea',
+    CN: 'China',
+    IN: 'India',
+    RU: 'Russia',
+    SA: 'Saudi Arabia',
+    AE: 'UAE',
+    NL: 'Netherlands',
+    BE: 'Belgium',
+    CH: 'Switzerland',
+    AT: 'Austria',
+    SE: 'Sweden',
+    NO: 'Norway',
+    DK: 'Denmark',
+    FI: 'Finland',
+    IE: 'Ireland',
+    PT: 'Portugal',
+    PL: 'Poland',
+    CZ: 'Czech Republic',
+    HU: 'Hungary',
+    GR: 'Greece',
+    TR: 'Turkey',
+    IL: 'Israel',
+    ZA: 'South Africa',
+    NG: 'Nigeria',
+    EG: 'Egypt',
+    MA: 'Morocco',
+    KE: 'Kenya',
+    GH: 'Ghana',
+    TH: 'Thailand',
+    SG: 'Singapore',
+    MY: 'Malaysia',
+    ID: 'Indonesia',
+    PH: 'Philippines',
+    VN: 'Vietnam',
+    NZ: 'New Zealand'
+  }
+  return countryNames[countryCode] || countryCode
+}
+
+function getCountryFromLocale(locale?: string): string {
+  if (!locale) return 'worldwide'
+
+  // Extract country code from locale (e.g., 'en-US' -> 'US')
+  const parts = locale.split('-')
+  if (parts.length > 1) {
+    return parts[1].toUpperCase()
+  }
+
+  // Handle special cases for language codes
+  const languageToCountry: Record<string, string> = {
+    en: 'US',
+    fr: 'FR',
+    de: 'DE',
+    es: 'ES',
+    it: 'IT',
+    ja: 'JP',
+    ko: 'KR',
+    zh: 'CN',
+    pt: 'PT',
+    ru: 'RU',
+    ar: 'SA',
+    hi: 'IN'
+  }
+
+  return languageToCountry[parts[0].toLowerCase()] || 'worldwide'
+}
+
+function getCountryLanguage(countryCode: string, userLocale?: string): string {
+  // If we have a full locale, extract the language part
+  if (userLocale) {
+    const parts = userLocale.split('-')
+    if (parts.length > 0) {
+      return parts[0].toLowerCase()
+    }
+  }
+
+  // Fallback to country-specific primary languages
+  const countryToLanguage: Record<string, string> = {
+    FR: 'fr',
+    DE: 'de',
+    ES: 'es',
+    IT: 'it',
+    PT: 'pt',
+    RU: 'ru',
+    JP: 'ja',
+    KR: 'ko',
+    CN: 'zh',
+    IN: 'hi',
+    BR: 'pt',
+    MX: 'es',
+    AR: 'es',
+    SA: 'ar',
+    AE: 'ar'
+  }
+
+  return countryToLanguage[countryCode] || 'en'
+}
+
+export type MediaType =
+  | 'article'
+  | 'video'
+  | 'research'
+  | 'podcast'
+  | 'report'
+  | 'blog'
 
 export interface MediaItem {
   id: string
@@ -31,130 +150,73 @@ interface MediaQuery {
 const MEDIA_QUERIES: Record<MediaType, MediaQuery[]> = {
   article: [
     {
-      query: 'artificial intelligence breakthrough latest research 2024',
-      category: 'Technology',
-      tags: ['AI', 'Research', 'Innovation'],
+      query: 'trending news headlines latest',
+      category: 'General',
+      tags: ['News', 'Trending'],
       mediaType: 'article'
     },
     {
-      query: 'startup funding venture capital tech companies',
-      category: 'Business',
-      tags: ['Startups', 'Funding', 'VC'],
-      mediaType: 'article'
-    },
-    {
-      query: 'climate change renewable energy sustainability',
-      category: 'Environment',
-      tags: ['Climate', 'Sustainability', 'Green Tech'],
-      mediaType: 'article'
-    },
-    {
-      query: 'space exploration NASA SpaceX discoveries',
-      category: 'Science',
-      tags: ['Space', 'Exploration', 'Discovery'],
+      query: 'breaking news worldwide',
+      category: 'General',
+      tags: ['Breaking', 'News'],
       mediaType: 'article'
     }
   ],
   research: [
     {
-      query: 'machine learning research papers arxiv latest',
-      category: 'Technology',
-      tags: ['ML', 'Research', 'Academic'],
+      query: 'research papers latest publications',
+      category: 'General',
+      tags: ['Research', 'Academic', 'Papers'],
       mediaType: 'research',
       domains: ['arxiv.org', 'scholar.google.com', 'nature.com', 'science.org']
-    },
-    {
-      query: 'quantum computing research breakthroughs',
-      category: 'Science',
-      tags: ['Quantum', 'Research', 'Physics'],
-      mediaType: 'research',
-      domains: ['arxiv.org', 'nature.com', 'physicstoday.scitation.org']
-    },
-    {
-      query: 'medical research healthcare innovations',
-      category: 'Health',
-      tags: ['Medicine', 'Healthcare', 'Research'],
-      mediaType: 'research',
-      domains: ['pubmed.ncbi.nlm.nih.gov', 'nejm.org', 'thelancet.com']
     }
   ],
   video: [
     {
-      query: 'AI technology explained tutorials',
-      category: 'Technology',
-      tags: ['AI', 'Tutorial', 'Learning'],
-      mediaType: 'video'
-    },
-    {
-      query: 'startup founder interviews entrepreneurship',
-      category: 'Business',
-      tags: ['Entrepreneurship', 'Interviews', 'Business'],
-      mediaType: 'video'
-    },
-    {
-      query: 'science documentaries latest discoveries',
-      category: 'Science',
-      tags: ['Documentary', 'Science', 'Discovery'],
+      query: 'trending videos latest',
+      category: 'General',
+      tags: ['Video', 'Trending'],
       mediaType: 'video'
     }
   ],
   podcast: [
     {
-      query: 'tech podcast artificial intelligence',
-      category: 'Technology',
-      tags: ['Podcast', 'AI', 'Tech Talk'],
-      mediaType: 'podcast'
-    },
-    {
-      query: 'business podcast startup entrepreneurship',
-      category: 'Business',
-      tags: ['Podcast', 'Business', 'Entrepreneurship'],
-      mediaType: 'podcast'
-    },
-    {
-      query: 'science podcast research discoveries',
-      category: 'Science',
-      tags: ['Podcast', 'Science', 'Research'],
+      query: 'trending podcasts latest episodes',
+      category: 'General',
+      tags: ['Podcast', 'Trending'],
       mediaType: 'podcast'
     }
   ],
   blog: [
     {
-      query: 'tech blog development programming',
-      category: 'Technology',
-      tags: ['Development', 'Programming', 'Blog'],
+      query: 'trending blogs latest posts',
+      category: 'General',
+      tags: ['Blog', 'Trending'],
       mediaType: 'blog',
       domains: ['medium.com', 'dev.to', 'hashnode.com', 'substack.com']
-    },
-    {
-      query: 'business strategy blog insights',
-      category: 'Business',
-      tags: ['Strategy', 'Business', 'Insights'],
-      mediaType: 'blog',
-      domains: ['medium.com', 'substack.com', 'harvard.edu']
     }
   ],
   report: [
     {
-      query: 'industry report market analysis 2024',
-      category: 'Business',
-      tags: ['Report', 'Analysis', 'Market'],
+      query: 'latest reports analysis insights',
+      category: 'General',
+      tags: ['Report', 'Analysis'],
       mediaType: 'report',
       domains: ['mckinsey.com', 'pwc.com', 'deloitte.com', 'statista.com']
-    },
-    {
-      query: 'technology trends report future insights',
-      category: 'Technology',
-      tags: ['Report', 'Trends', 'Future'],
-      mediaType: 'report',
-      domains: ['gartner.com', 'forrester.com', 'mit.edu']
     }
   ]
 }
 
 // Use Tavily API to get diverse media content
 async function getTrendingMedia(
-  mediaTypes: MediaType[] = ['article', 'research', 'video', 'podcast', 'blog', 'report'],
+  mediaTypes: MediaType[] = [
+    'article',
+    'research',
+    'video',
+    'podcast',
+    'blog',
+    'report'
+  ],
   userCountry?: string,
   userLocale?: string
 ): Promise<MediaItem[]> {
@@ -169,17 +231,17 @@ async function getTrendingMedia(
 
   try {
     // Build queries based on selected media types
-    const selectedQueries = mediaTypes.flatMap(type => 
+    const selectedQueries = mediaTypes.flatMap(type =>
       MEDIA_QUERIES[type] ? MEDIA_QUERIES[type] : []
     )
-    
+
     // Add country-specific queries if user country is provided
     let localQueries: MediaQuery[] = []
     if (userCountry && userCountry !== 'worldwide') {
       const countryName = getCountryName(userCountry)
       const language = getCountryLanguage(userCountry, userLocale)
       const localizedQueries = getLocalizedQueries(countryName, language)
-      
+
       localQueries = [
         {
           query: localizedQueries.technology,
@@ -189,19 +251,19 @@ async function getTrendingMedia(
         },
         {
           query: localizedQueries.business,
-          category: 'Business', 
+          category: 'Business',
           tags: ['Local Business', countryName],
           mediaType: 'article'
         },
         {
           query: localizedQueries.research,
           category: 'Science',
-          tags: ['Local Research', countryName], 
+          tags: ['Local Research', countryName],
           mediaType: 'research'
         }
       ]
     }
-    
+
     const allQueries = [...selectedQueries, ...localQueries]
 
     const mediaPromises = allQueries.map(async queryObj => {
@@ -213,11 +275,15 @@ async function getTrendingMedia(
           include_answer: false,
           include_images: true,
           include_raw_content: false,
-          max_results: 3
+          max_results: 3,
+          days: 7 // Limit to content from the last 7 days
         }
 
         // Only use domain filtering for research and reports to ensure quality
-        if (queryObj.domains && (queryObj.mediaType === 'research' || queryObj.mediaType === 'report')) {
+        if (
+          queryObj.domains &&
+          (queryObj.mediaType === 'research' || queryObj.mediaType === 'report')
+        ) {
           searchBody.include_domains = queryObj.domains
         }
         // For other media types, let Tavily search broadly for better results
@@ -237,36 +303,55 @@ async function getTrendingMedia(
         }
 
         const data: SearchResults = await response.json()
-        
+
         // Debug logging
-        console.log(`Query "${queryObj.query}" returned ${data.results?.length || 0} results`)
+        console.log(
+          `Query "${queryObj.query}" returned ${data.results?.length || 0} results`
+        )
 
         return data.results.map((result, index) => ({
           id: `media-${queryObj.mediaType}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           title: result.title,
-          description: result.content.length > 200 ? result.content.substring(0, 200) + '...' : result.content,
+          description:
+            result.content.length > 200
+              ? result.content.substring(0, 200) + '...'
+              : result.content,
           url: result.url,
           source: extractDomain(result.url),
-          publishedAt: new Date(Date.now() - (index + Math.random() * 0.5) * 60 * 60 * 1000),
+          publishedAt: new Date(
+            Date.now() - (index + Math.random() * 0.5) * 60 * 60 * 1000
+          ),
           category: queryObj.category,
           mediaType: queryObj.mediaType,
           tags: queryObj.tags,
-          duration: queryObj.mediaType === 'video' ? getEstimatedDuration(queryObj.mediaType) : undefined,
-          pageCount: queryObj.mediaType === 'report' ? Math.floor(Math.random() * 50) + 10 : undefined,
+          duration:
+            queryObj.mediaType === 'video'
+              ? getEstimatedDuration(queryObj.mediaType)
+              : undefined,
+          pageCount:
+            queryObj.mediaType === 'report'
+              ? Math.floor(Math.random() * 50) + 10
+              : undefined,
           score: Math.random() * 0.3 + 0.7,
-          country: localQueries.includes(queryObj) ? userCountry || 'worldwide' : 'worldwide',
-          imageUrl: data.images && data.images.length > index
-            ? typeof data.images[index] === 'string'
-              ? data.images[index]
-              : data.images[index]?.url
-            : data.images && data.images.length > 0
-              ? typeof data.images[0] === 'string'
-                ? data.images[0]
-                : data.images[0]?.url
-              : undefined
+          country: localQueries.includes(queryObj)
+            ? userCountry || 'worldwide'
+            : 'worldwide',
+          imageUrl:
+            data.images && data.images.length > index
+              ? typeof data.images[index] === 'string'
+                ? data.images[index]
+                : data.images[index]?.url
+              : data.images && data.images.length > 0
+                ? typeof data.images[0] === 'string'
+                  ? data.images[0]
+                  : data.images[0]?.url
+                : undefined
         }))
       } catch (error) {
-        console.error(`Error fetching media for query "${queryObj.query}":`, error)
+        console.error(
+          `Error fetching media for query "${queryObj.query}":`,
+          error
+        )
         return []
       }
     })
@@ -276,9 +361,13 @@ async function getTrendingMedia(
 
     // Sort by score and recency, then limit
     const sortedResults = allResults
-      .sort((a, b) => 
-        (b.score || 0) * 0.7 + 
-        ((new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()) / 1000000) * 0.3
+      .sort(
+        (a, b) =>
+          (b.score || 0) * 0.7 +
+          ((new Date(b.publishedAt).getTime() -
+            new Date(a.publishedAt).getTime()) /
+            1000000) *
+            0.3
       )
       .slice(0, 32) // Increase limit for more variety
 
@@ -298,35 +387,47 @@ async function getTrendingMedia(
 function getDefaultDomainsForMediaType(mediaType: MediaType): string[] {
   const domainMap: Record<MediaType, string[]> = {
     article: [
-      'techcrunch.com', 'wired.com', 'theverge.com', 'arstechnica.com',
-      'reuters.com', 'bbc.com', 'nytimes.com', 'washingtonpost.com'
+      'techcrunch.com',
+      'wired.com',
+      'theverge.com',
+      'arstechnica.com',
+      'reuters.com',
+      'bbc.com',
+      'nytimes.com',
+      'washingtonpost.com'
     ],
     research: [
-      'arxiv.org', 'nature.com', 'science.org', 'scholar.google.com',
-      'pubmed.ncbi.nlm.nih.gov', 'ieee.org', 'acm.org'
+      'arxiv.org',
+      'nature.com',
+      'science.org',
+      'scholar.google.com',
+      'pubmed.ncbi.nlm.nih.gov',
+      'ieee.org',
+      'acm.org'
     ],
-    video: [
-      'youtube.com', 'vimeo.com', 'ted.com'
-    ],
-    podcast: [
-      'spotify.com', 'apple.com', 'soundcloud.com', 'anchor.fm'
-    ],
-    blog: [
-      'medium.com', 'dev.to', 'hashnode.com', 'substack.com', 'ghost.org'
-    ],
+    video: ['youtube.com', 'vimeo.com', 'ted.com'],
+    podcast: ['spotify.com', 'apple.com', 'soundcloud.com', 'anchor.fm'],
+    blog: ['medium.com', 'dev.to', 'hashnode.com', 'substack.com', 'ghost.org'],
     report: [
-      'mckinsey.com', 'pwc.com', 'deloitte.com', 'bcg.com',
-      'gartner.com', 'forrester.com', 'statista.com'
+      'mckinsey.com',
+      'pwc.com',
+      'deloitte.com',
+      'bcg.com',
+      'gartner.com',
+      'forrester.com',
+      'statista.com'
     ]
   }
-  
+
   return domainMap[mediaType] || []
 }
 
 function getEstimatedDuration(mediaType: MediaType): string | undefined {
   if (mediaType === 'video') {
     const minutes = Math.floor(Math.random() * 30) + 5 // 5-35 minutes
-    return `${minutes}:${Math.floor(Math.random() * 60).toString().padStart(2, '0')}`
+    return `${minutes}:${Math.floor(Math.random() * 60)
+      .toString()
+      .padStart(2, '0')}`
   }
   if (mediaType === 'podcast') {
     const minutes = Math.floor(Math.random() * 60) + 15 // 15-75 minutes
@@ -335,7 +436,6 @@ function getEstimatedDuration(mediaType: MediaType): string | undefined {
   return undefined
 }
 
-
 function extractDomain(url: string): string {
   try {
     const domain = new URL(url).hostname.replace('www.', '')
@@ -343,86 +443,6 @@ function extractDomain(url: string): string {
   } catch {
     return 'Unknown'
   }
-}
-
-function getCountryName(countryCode: string): string {
-  const countryNames: Record<string, string> = {
-    US: 'United States',
-    FR: 'France', 
-    GB: 'United Kingdom',
-    DE: 'Germany',
-    IT: 'Italy',
-    ES: 'Spain',
-    CA: 'Canada',
-    AU: 'Australia',
-    JP: 'Japan',
-    CN: 'China',
-    IN: 'India',
-    BR: 'Brazil',
-    MX: 'Mexico',
-    RU: 'Russia',
-    KR: 'South Korea',
-    NL: 'Netherlands',
-    SE: 'Sweden',
-    NO: 'Norway',
-    DK: 'Denmark',
-    FI: 'Finland',
-    CH: 'Switzerland',
-    AT: 'Austria',
-    BE: 'Belgium',
-    IE: 'Ireland',
-    PT: 'Portugal',
-    PL: 'Poland',
-    CZ: 'Czech Republic'
-  }
-  return countryNames[countryCode] || countryCode
-}
-
-function getCountryLanguage(countryCode: string, userLocale?: string): string {
-  // If we have a full locale, extract the language part
-  if (userLocale) {
-    const parts = userLocale.split('-')
-    if (parts.length > 0) {
-      return parts[0].toLowerCase()
-    }
-  }
-
-  // Fallback to country-specific primary languages
-  const countryToLanguage: Record<string, string> = {
-    FR: 'fr',
-    DE: 'de',
-    ES: 'es',
-    IT: 'it',
-    PT: 'pt',
-    RU: 'ru',
-    JP: 'ja',
-    KR: 'ko',
-    CN: 'zh',
-    IN: 'hi',
-    BR: 'pt',
-    MX: 'es',
-    NL: 'nl',
-    SE: 'sv',
-    NO: 'no',
-    DK: 'da',
-    FI: 'fi',
-    PL: 'pl',
-    CZ: 'cs',
-    HU: 'hu',
-    GR: 'el',
-    TR: 'tr',
-    IL: 'he',
-    SA: 'ar',
-    EG: 'ar',
-    MA: 'ar',
-    TH: 'th',
-    VN: 'vi',
-    ID: 'id',
-    MY: 'ms',
-    PH: 'tl'
-  }
-
-  return countryToLanguage[countryCode] || 'en'
 }
 
 function getLocalizedQueries(countryName: string, language: string) {
@@ -494,4 +514,4 @@ function getLocalizedQueries(countryName: string, language: string) {
   return queries[language] || fallbackQueries
 }
 
-export { getTrendingMedia }
+export { getCountryFromLocale, getCountryLanguage,getCountryName, getTrendingMedia }

@@ -8,6 +8,7 @@ import { Message } from 'ai/react'
 import { toast } from 'sonner'
 
 import { CHAT_ID } from '@/lib/constants'
+import { type SuggestionItem } from '@/lib/services/suggestions-service'
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
 
@@ -25,12 +26,14 @@ export function Chat({
   id,
   savedMessages = [],
   query,
-  models
+  models,
+  suggestions
 }: {
   id: string
   savedMessages?: Message[]
   query?: string
   models?: Model[]
+  suggestions?: SuggestionItem[]
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -232,6 +235,7 @@ export function Chat({
         query={query}
         append={append}
         models={models}
+        suggestions={suggestions}
         showScrollToBottomButton={!isAtBottom}
         scrollContainerRef={scrollContainerRef}
       />

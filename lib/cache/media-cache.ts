@@ -17,12 +17,14 @@ const getCachedTrendingMediaRaw = unstable_cache(
   ): Promise<MediaItem[]> => {
     console.log(`🔄 Fetching fresh media data from Tavily API...`)
     const startTime = Date.now()
-    
+
     try {
       const media = await getTrendingMedia(mediaTypes, userCountry, userLocale)
       const endTime = Date.now()
-      
-      console.log(`✅ Successfully fetched ${media.length} media items in ${endTime - startTime}ms`)
+
+      console.log(
+        `✅ Successfully fetched ${media.length} media items in ${endTime - startTime}ms`
+      )
       return media
     } catch (error) {
       console.error('❌ Error fetching media from cache:', error)
@@ -45,8 +47,12 @@ export const getCachedTrendingMedia = async (
   userCountry?: string,
   userLocale?: string
 ): Promise<MediaItem[]> => {
-  const cachedMedia = await getCachedTrendingMediaRaw(mediaTypes, userCountry, userLocale)
-  
+  const cachedMedia = await getCachedTrendingMediaRaw(
+    mediaTypes,
+    userCountry,
+    userLocale
+  )
+
   // Ensure publishedAt is a proper Date object
   return cachedMedia.map(item => ({
     ...item,

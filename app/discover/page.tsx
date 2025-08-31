@@ -2,13 +2,14 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 
 import { getCachedTrendingMedia } from '@/lib/cache/media-cache'
-import { getCountryFromLocale } from '@/lib/services/news-service'
+import { getCountryFromLocale } from '@/lib/services/media-service'
 
 import { DiscoverPage } from '@/components/discover/discover-page'
 
 export const metadata: Metadata = {
   title: 'Discover Trending Content - Latest Articles, Research & Videos',
-  description: 'Explore trending articles, research papers, videos, podcasts and reports from around the world. Stay updated with the latest in technology, business, science, health and more.',
+  description:
+    'Explore trending articles, research papers, videos, podcasts and reports from around the world. Stay updated with the latest in technology, business, science, health and more.',
   keywords: [
     'trending content',
     'latest news',
@@ -21,22 +22,24 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: 'Discover Trending Content - Latest Articles, Research & Videos',
-    description: 'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
+    description:
+      'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
     url: 'https://www.ekinox.app/discover',
     images: [
       {
         url: '/images/og-discover.png',
         width: 1200,
         height: 630,
-        alt: 'Ekinox AI Discover - Trending Content Discovery',
-      },
-    ],
+        alt: 'Ekinox AI Discover - Trending Content Discovery'
+      }
+    ]
   },
   twitter: {
     title: 'Discover Trending Content - Latest Articles, Research & Videos',
-    description: 'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
-    images: ['/images/og-discover.png'],
-  },
+    description:
+      'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
+    images: ['/images/og-discover.png']
+  }
 }
 
 export default async function Discover() {
@@ -57,7 +60,8 @@ export default async function Discover() {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'Discover Trending Content',
-    description: 'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
+    description:
+      'Explore trending articles, research papers, videos, podcasts and reports from around the world.',
     url: 'https://www.ekinox.app/discover',
     mainEntity: {
       '@type': 'ItemList',
@@ -66,9 +70,14 @@ export default async function Discover() {
         '@type': 'ListItem',
         position: index + 1,
         item: {
-          '@type': item.mediaType === 'article' ? 'Article' : 
-                   item.mediaType === 'video' ? 'VideoObject' :
-                   item.mediaType === 'research' ? 'ScholarlyArticle' : 'CreativeWork',
+          '@type':
+            item.mediaType === 'article'
+              ? 'Article'
+              : item.mediaType === 'video'
+                ? 'VideoObject'
+                : item.mediaType === 'research'
+                  ? 'ScholarlyArticle'
+                  : 'CreativeWork',
           name: item.title,
           description: item.description,
           url: item.url,

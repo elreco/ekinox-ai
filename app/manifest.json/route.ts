@@ -2,7 +2,8 @@ export function GET() {
   const manifest = {
     name: 'Ekinox AI - AI-Powered Research & Content Discovery Platform',
     short_name: 'Ekinox AI',
-    description: 'Discover trending articles, research papers, videos & podcasts with AI. Get intelligent answers from trusted sources.',
+    description:
+      'Discover trending articles, research papers, videos & podcasts with AI. Get intelligent answers from trusted sources.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

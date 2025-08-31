@@ -2,8 +2,8 @@ import { revalidateTag } from 'next/cache'
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
- * API endpoint to manually refresh the media cache
- * Usage: POST /api/media/refresh
+ * API endpoint to manually refresh the suggestions cache
+ * Usage: POST /api/suggestions/refresh
  */
 export async function POST(request: NextRequest) {
   try {
@@ -19,18 +19,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Revalidate the media cache
-    revalidateTag('media')
-    revalidateTag('discover')
+    // Revalidate the suggestions cache
+    revalidateTag('suggestions')
+    revalidateTag('homepage')
 
-    console.log('🔄 Media cache manually refreshed via API')
+    console.log('🔄 Suggestions cache manually refreshed via API')
 
     return NextResponse.json({
-      message: 'Media cache refreshed successfully',
+      message: 'Suggestions cache refreshed successfully',
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Error refreshing media cache:', error)
+    console.error('Error refreshing suggestions cache:', error)
     return NextResponse.json(
       { error: 'Failed to refresh cache' },
       { status: 500 }

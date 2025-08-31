@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Message } from 'ai'
 import { ArrowUp, ChevronDown, MessageCirclePlus, Square } from 'lucide-react'
 
+import { type SuggestionItem } from '@/lib/services/suggestions-service'
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
 
@@ -28,6 +29,7 @@ interface ChatPanelProps {
   stop: () => void
   append: (message: any) => void
   models?: Model[]
+  suggestions?: SuggestionItem[]
   /** Whether to show the scroll to bottom button */
   showScrollToBottomButton: boolean
   /** Reference to the scroll container */
@@ -45,6 +47,7 @@ export function ChatPanel({
   stop,
   append,
   models,
+  suggestions,
   showScrollToBottomButton,
   scrollContainerRef
 }: ChatPanelProps) {
@@ -223,6 +226,7 @@ export function ChatPanel({
                 target: { value: message }
               } as React.ChangeEvent<HTMLTextAreaElement>)
             }}
+            suggestions={suggestions}
             className={cn(
               showEmptyScreen
                 ? 'opacity-100 transition-all duration-300'

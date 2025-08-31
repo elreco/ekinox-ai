@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   formatDetection: {
     email: false,
     address: false,
-    telephone: false,
+    telephone: false
   },
   openGraph: {
     type: 'website',
@@ -64,9 +64,9 @@ export const metadata: Metadata = {
         url: '/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Ekinox AI - AI-Powered Research & Content Discovery Platform',
-      },
-    ],
+        alt: 'Ekinox AI - AI-Powered Research & Content Discovery Platform'
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
@@ -84,18 +84,18 @@ export const metadata: Metadata = {
       follow: true,
       'max-video-preview': -1,
       'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
+      'max-snippet': -1
+    }
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
   },
   manifest: '/manifest.json',
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-status-bar-style': 'black-translucent',
-  },
+    'apple-mobile-web-app-status-bar-style': 'black-translucent'
+  }
 }
 
 export const viewport: Viewport = {
@@ -168,7 +168,11 @@ export default async function RootLayout({
             <AppSidebar user={user} />
             <div className="flex flex-col flex-1">
               <Header user={user} />
-              <main id="main-content" className="flex flex-1 min-h-0" role="main">
+              <main
+                id="main-content"
+                className="flex flex-1 min-h-0"
+                role="main"
+              >
                 <ArtifactRoot>{children}</ArtifactRoot>
               </main>
             </div>

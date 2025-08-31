@@ -1,12 +1,11 @@
 'use client'
 
-import { useEffect,useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import {
   BookOpen,
   Calendar,
-  ChevronDown,
   Clock,
   ExternalLink,
   FileText,
@@ -22,23 +21,17 @@ import {
   Search,
   Sparkles,
   Star,
-  Tag,
   TrendingUp,
-  User,
   Video
 } from 'lucide-react'
 
-import { type MediaItem, type MediaType } from '@/lib/services/media-service'
+import { type MediaItem } from '@/lib/services/media-service'
 import { cn, formatTimeAgo } from '@/lib/utils'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
+  Card
 } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -50,7 +43,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface DiscoverPageProps {
   media: MediaItem[]
@@ -77,21 +69,58 @@ const CATEGORIES = [
 ]
 
 const MEDIA_TYPES = [
-  { id: 'all', label: 'All Media', icon: Globe, color: 'bg-gray-100 text-gray-800' },
-  { id: 'article', label: 'Articles', icon: FileText, color: 'bg-blue-100 text-blue-800' },
-  { id: 'research', label: 'Research', icon: Microscope, color: 'bg-purple-100 text-purple-800' },
-  { id: 'video', label: 'Videos', icon: Video, color: 'bg-red-100 text-red-800' },
-  { id: 'podcast', label: 'Podcasts', icon: Mic, color: 'bg-green-100 text-green-800' },
-  { id: 'blog', label: 'Blogs', icon: BookOpen, color: 'bg-orange-100 text-orange-800' },
-  { id: 'report', label: 'Reports', icon: FileText, color: 'bg-indigo-100 text-indigo-800' }
+  {
+    id: 'all',
+    label: 'All Media',
+    icon: Globe,
+    color: 'bg-gray-100 text-gray-800'
+  },
+  {
+    id: 'article',
+    label: 'Articles',
+    icon: FileText,
+    color: 'bg-blue-100 text-blue-800'
+  },
+  {
+    id: 'research',
+    label: 'Research',
+    icon: Microscope,
+    color: 'bg-purple-100 text-purple-800'
+  },
+  {
+    id: 'video',
+    label: 'Videos',
+    icon: Video,
+    color: 'bg-red-100 text-red-800'
+  },
+  {
+    id: 'podcast',
+    label: 'Podcasts',
+    icon: Mic,
+    color: 'bg-green-100 text-green-800'
+  },
+  {
+    id: 'blog',
+    label: 'Blogs',
+    icon: BookOpen,
+    color: 'bg-orange-100 text-orange-800'
+  },
+  {
+    id: 'report',
+    label: 'Reports',
+    icon: FileText,
+    color: 'bg-indigo-100 text-indigo-800'
+  }
 ]
 
 export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Initialize state from URL params
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get('search') || ''
+  )
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchParams.get('categories')?.split(',') || ['all']
   )
@@ -119,7 +148,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
     view?: ViewMode
   }) => {
     const url = new URL(window.location.href)
-    
+
     // Update search param
     if (params.search !== undefined) {
       if (params.search) {
@@ -128,7 +157,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('search')
       }
     }
-    
+
     // Update categories param
     if (params.categories !== undefined) {
       if (params.categories.length > 0 && !params.categories.includes('all')) {
@@ -137,7 +166,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('categories')
       }
     }
-    
+
     // Update media types param
     if (params.mediaTypes !== undefined) {
       if (params.mediaTypes.length > 0 && !params.mediaTypes.includes('all')) {
@@ -146,7 +175,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('mediaTypes')
       }
     }
-    
+
     // Update country param
     if (params.country !== undefined) {
       if (params.country !== 'all') {
@@ -155,7 +184,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('country')
       }
     }
-    
+
     // Update sort param
     if (params.sort !== undefined) {
       if (params.sort !== 'relevance') {
@@ -164,7 +193,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('sort')
       }
     }
-    
+
     // Update view param
     if (params.view !== undefined) {
       if (params.view !== 'grid') {
@@ -173,7 +202,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         url.searchParams.delete('view')
       }
     }
-    
+
     // Update URL without page refresh
     window.history.replaceState({}, '', url.toString())
   }
@@ -192,8 +221,10 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
       blog: `Analyze this blog post: "${mediaItem.title}". What are the main arguments and insights?`,
       report: `Break down this report: "${mediaItem.title}". What are the key findings and business implications?`
     }
-    
-    const query = mediaTypeQueries[mediaItem.mediaType] || `Tell me more about: "${mediaItem.title}".`
+
+    const query =
+      mediaTypeQueries[mediaItem.mediaType] ||
+      `Tell me more about: "${mediaItem.title}".`
 
     // Navigate to search page with the query
     const encodedQuery = encodeURIComponent(query)
@@ -224,7 +255,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         selectedCategories.includes(item.category)
       )
     }
-    
+
     // Media type filter
     if (!selectedMediaTypes.includes('all')) {
       filtered = filtered.filter(item =>
@@ -256,7 +287,14 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
     }
 
     return filtered
-  }, [media, searchQuery, selectedCategories, selectedMediaTypes, countryFilter, sortBy])
+  }, [
+    media,
+    searchQuery,
+    selectedCategories,
+    selectedMediaTypes,
+    countryFilter,
+    sortBy
+  ])
 
   const handleCategoryToggle = (categoryId: string) => {
     if (categoryId === 'all') {
@@ -271,8 +309,9 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         const newCategories = prev.includes(categoryId)
           ? categories.filter(id => id !== categoryId)
           : [...categories, categoryId]
-        
-        const finalCategories = newCategories.length === 0 ? ['all'] : newCategories
+
+        const finalCategories =
+          newCategories.length === 0 ? ['all'] : newCategories
         updateURL({ categories: finalCategories })
         return finalCategories
       })
@@ -292,8 +331,9 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
         const newMediaTypes = prev.includes(mediaTypeId)
           ? mediaTypes.filter(id => id !== mediaTypeId)
           : [...mediaTypes, mediaTypeId]
-        
-        const finalMediaTypes = newMediaTypes.length === 0 ? ['all'] : newMediaTypes
+
+        const finalMediaTypes =
+          newMediaTypes.length === 0 ? ['all'] : newMediaTypes
         updateURL({ mediaTypes: finalMediaTypes })
         return finalMediaTypes
       })
@@ -310,7 +350,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
     )
     return stats
   }
-  
+
   const getMediaTypeStats = () => {
     const stats = media.reduce(
       (acc, item) => {
@@ -326,7 +366,8 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
   const mediaTypeStats = getMediaTypeStats()
 
   // Check if any filters are active
-  const hasActiveFilters = searchQuery !== '' || 
+  const hasActiveFilters =
+    searchQuery !== '' ||
     !selectedCategories.includes('all') ||
     !selectedMediaTypes.includes('all') ||
     countryFilter !== 'all' ||
@@ -366,8 +407,9 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                 Discover All Media
               </h1>
               <p className="mx-auto max-w-3xl text-xl text-muted-foreground mb-8">
-                Explore trending articles, research papers, videos, podcasts, and reports from trusted sources worldwide. 
-                Start intelligent conversations with AI about any type of content.
+                Explore trending articles, research papers, videos, podcasts,
+                and reports from trusted sources worldwide. Start intelligent
+                conversations with AI about any type of content.
               </p>
 
               {/* Quick Stats */}
@@ -421,10 +463,12 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => {
-                      setCountryFilter('all')
-                      updateURL({ country: 'all' })
-                    }}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setCountryFilter('all')
+                        updateURL({ country: 'all' })
+                      }}
+                    >
                       <Globe className="h-4 w-4 mr-2" />
                       All Content
                     </DropdownMenuItem>
@@ -490,7 +534,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                
+
                 {/* Category Filter */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -537,17 +581,21 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => {
-                      setSortBy('relevance')
-                      updateURL({ sort: 'relevance' })
-                    }}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSortBy('relevance')
+                        updateURL({ sort: 'relevance' })
+                      }}
+                    >
                       <Star className="h-4 w-4 mr-2" />
                       By Relevance
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      setSortBy('recency')
-                      updateURL({ sort: 'recency' })
-                    }}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSortBy('recency')
+                        updateURL({ sort: 'recency' })
+                      }}
+                    >
                       <Calendar className="h-4 w-4 mr-2" />
                       Most Recent
                     </DropdownMenuItem>
@@ -599,74 +647,76 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
             {((selectedCategories.length > 0 &&
               !selectedCategories.includes('all')) ||
               (selectedMediaTypes.length > 0 &&
-              !selectedMediaTypes.includes('all')) ||
+                !selectedMediaTypes.includes('all')) ||
               searchQuery) && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {searchQuery && (
-                    <Badge variant="secondary" className="gap-1">
-                      Search: {searchQuery}
-                      <button
-                        onClick={() => {
-                      setSearchQuery('')
-                      updateURL({ search: '' })
-                    }}
-                        className="ml-1 hover:bg-muted rounded-full p-0.5"
-                      >
-                        ×
-                      </button>
-                    </Badge>
-                  )}
-                  {selectedMediaTypes
-                    .filter(id => id !== 'all')
-                    .map(mediaTypeId => {
-                      const mediaType = MEDIA_TYPES.find(t => t.id === mediaTypeId)
-                      return (
-                        mediaType && (
-                          <Badge
-                            key={mediaTypeId}
-                            variant="secondary"
-                            className="gap-1"
-                          >
-                            <mediaType.icon className="h-3 w-3 mr-1" />
-                            {mediaType.label}
-                            <button
-                              onClick={() => {
+              <div className="flex flex-wrap gap-2 mt-3">
+                {searchQuery && (
+                  <Badge variant="secondary" className="gap-1">
+                    Search: {searchQuery}
+                    <button
+                      onClick={() => {
+                        setSearchQuery('')
+                        updateURL({ search: '' })
+                      }}
+                      className="ml-1 hover:bg-muted rounded-full p-0.5"
+                    >
+                      ×
+                    </button>
+                  </Badge>
+                )}
+                {selectedMediaTypes
+                  .filter(id => id !== 'all')
+                  .map(mediaTypeId => {
+                    const mediaType = MEDIA_TYPES.find(
+                      t => t.id === mediaTypeId
+                    )
+                    return (
+                      mediaType && (
+                        <Badge
+                          key={mediaTypeId}
+                          variant="secondary"
+                          className="gap-1"
+                        >
+                          <mediaType.icon className="h-3 w-3 mr-1" />
+                          {mediaType.label}
+                          <button
+                            onClick={() => {
                               handleMediaTypeToggle(mediaTypeId)
                             }}
-                              className="ml-1 hover:bg-muted rounded-full p-0.5"
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        )
-                      )
-                    })}
-                  {selectedCategories
-                    .filter(id => id !== 'all')
-                    .map(categoryId => {
-                      const category = CATEGORIES.find(c => c.id === categoryId)
-                      return (
-                        category && (
-                          <Badge
-                            key={categoryId}
-                            variant="secondary"
-                            className="gap-1"
+                            className="ml-1 hover:bg-muted rounded-full p-0.5"
                           >
-                            {category.label}
-                            <button
-                              onClick={() => {
+                            ×
+                          </button>
+                        </Badge>
+                      )
+                    )
+                  })}
+                {selectedCategories
+                  .filter(id => id !== 'all')
+                  .map(categoryId => {
+                    const category = CATEGORIES.find(c => c.id === categoryId)
+                    return (
+                      category && (
+                        <Badge
+                          key={categoryId}
+                          variant="secondary"
+                          className="gap-1"
+                        >
+                          {category.label}
+                          <button
+                            onClick={() => {
                               handleCategoryToggle(categoryId)
                             }}
-                              className="ml-1 hover:bg-muted rounded-full p-0.5"
-                            >
-                              ×
-                            </button>
-                          </Badge>
-                        )
+                            className="ml-1 hover:bg-muted rounded-full p-0.5"
+                          >
+                            ×
+                          </button>
+                        </Badge>
                       )
-                    })}
-                </div>
-              )}
+                    )
+                  })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -687,9 +737,12 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
           {media.length === 0 ? (
             <div className="text-center py-16">
               <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No content available</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No content available
+              </h3>
               <p className="text-muted-foreground mb-4">
-                Unable to fetch content at the moment. Please check your API configuration.
+                Unable to fetch content at the moment. Please check your API
+                configuration.
               </p>
             </div>
           ) : filteredMedia.length === 0 ? (
@@ -743,53 +796,55 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                         : 'w-full sm:w-56 aspect-video sm:aspect-[4/3] flex-shrink-0'
                     )}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={item.imageUrl || '/images/placeholder-image.png'}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      onError={(e) => {
+                      onError={e => {
                         const target = e.target as HTMLImageElement
                         target.src = '/images/placeholder-image.png'
                       }}
                     />
 
-                      {/* Overlay badges */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    {/* Overlay badges */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                      {/* Source badge */}
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs font-medium">
-                          {item.source}
-                        </Badge>
-                      </div>
-
-                      {/* Featured badge */}
-                      {item.score && item.score > 0.9 && (
-                        <div className="absolute top-3 right-3">
-                          <Badge className="bg-amber-500/90 backdrop-blur-sm text-black border-amber-400/50 text-xs font-medium">
-                            <Star className="h-3 w-3 mr-1 fill-current" />
-                            Featured
-                          </Badge>
-                        </div>
-                      )}
-
-                      {/* Country indicator */}
-                      {item.country && item.country !== 'worldwide' && (
-                        <div className="absolute bottom-3 left-3">
-                          <Badge className="bg-blue-500/20 backdrop-blur-sm text-white border-blue-400/30 text-xs">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            Local
-                          </Badge>
-                        </div>
-                      )}
+                    {/* Source badge */}
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 text-xs font-medium">
+                        {item.source}
+                      </Badge>
                     </div>
 
+                    {/* Featured badge */}
+                    {item.score && item.score > 0.9 && (
+                      <div className="absolute top-3 right-3">
+                        <Badge className="bg-amber-500/90 backdrop-blur-sm text-black border-amber-400/50 text-xs font-medium">
+                          <Star className="h-3 w-3 mr-1 fill-current" />
+                          Featured
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Country indicator */}
+                    {item.country && item.country !== 'worldwide' && (
+                      <div className="absolute bottom-3 left-3">
+                        <Badge className="bg-blue-500/20 backdrop-blur-sm text-white border-blue-400/30 text-xs">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          Local
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Content Section */}
-                  <div className={cn(
-                    "flex flex-col flex-1",
-                    viewMode === 'list' ? "p-4 sm:p-6" : "p-6"
-                  )}>
-                    
+                  <div
+                    className={cn(
+                      'flex flex-col flex-1',
+                      viewMode === 'list' ? 'p-4 sm:p-6' : 'p-6'
+                    )}
+                  >
                     {/* Media Type and Category Badges */}
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
                       <Badge
@@ -797,11 +852,15 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
                         className="text-xs font-medium px-2 py-1"
                       >
                         {(() => {
-                          const mediaType = MEDIA_TYPES.find(t => t.id === item.mediaType)
+                          const mediaType = MEDIA_TYPES.find(
+                            t => t.id === item.mediaType
+                          )
                           const IconComponent = mediaType?.icon
                           return (
                             <div className="flex items-center gap-1">
-                              {IconComponent && <IconComponent className="h-3 w-3" />}
+                              {IconComponent && (
+                                <IconComponent className="h-3 w-3" />
+                              )}
                               <span>{mediaType?.label || item.mediaType}</span>
                             </div>
                           )
