@@ -1,9 +1,7 @@
 import { headers } from 'next/headers'
 
-import {
-  getCountryFromLocale,
-  getTrendingTopics
-} from '@/lib/services/news-service'
+import { getCachedTrendingMedia } from '@/lib/cache/media-cache'
+import { getCountryFromLocale } from '@/lib/services/news-service'
 
 import { DiscoverPage } from '@/components/discover/discover-page'
 
@@ -14,8 +12,12 @@ export default async function Discover() {
   const userLocale = acceptLanguage?.split(',')[0]?.split(';')[0] || 'en-US'
   const userCountry = getCountryFromLocale(userLocale)
 
-  // Get trending news from internet - this includes both worldwide and country-specific news
-  const trendingNews = await getTrendingTopics(userCountry, userLocale)
+  // Get cached trending media - refreshes automatically every 2 hours
+  const trendingMedia = await getCachedTrendingMedia(
+    ['article', 'research', 'video', 'podcast', 'blog', 'report'],
+    userCountry,
+    userLocale
+  )
 
-  return <DiscoverPage news={trendingNews} userCountry={userCountry} />
+  return <DiscoverPage media={trendingMedia} userCountry={userCountry} />
 }
