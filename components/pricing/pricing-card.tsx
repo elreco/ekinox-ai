@@ -71,9 +71,7 @@ export function PricingCard({
           }
           onClick={onSubscribe}
           disabled={
-            currentPlan ||
-            loading ||
-            (hasActiveSubscription && !currentPlan)
+            currentPlan || loading || (hasActiveSubscription && !currentPlan)
           }
         >
           {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
@@ -82,8 +80,8 @@ export function PricingCard({
             : hasActiveSubscription && plan.price > 0
               ? 'Active Subscription'
               : plan.price === 0
-                ? hasActiveSubscription 
-                  ? 'Free Plan' 
+                ? hasActiveSubscription
+                  ? 'Free Plan'
                   : 'Get Started'
                 : 'Subscribe'}
         </Button>

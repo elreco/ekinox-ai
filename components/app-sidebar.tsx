@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 
 import { User } from '@supabase/supabase-js'
-import { Plus } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -45,6 +45,14 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               <Link href="/" className="flex items-center gap-2">
                 <Plus className="size-4" />
                 <span>New</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/discover" className="flex items-center gap-2">
+                <Search className="size-4" />
+                <span>Discover</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -148,11 +148,11 @@ export async function getChat(id: string, userId: string = 'anonymous') {
 export async function clearChats(
   userId?: string | null
 ): Promise<{ error?: string }> {
-  const finalUserId = userId || await getCurrentUserId()
+  const finalUserId = userId || (await getCurrentUserId())
   if (!finalUserId) {
     return { error: 'User not authenticated' }
   }
-  
+
   const redis = await getRedis()
   const userChatKey = getUserChatKey(finalUserId)
   const chats = await redis.zrange(userChatKey, 0, -1)

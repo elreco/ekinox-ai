@@ -111,6 +111,9 @@ export function NavUser({ user }: UserMenuProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/discover">Discover</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="cursor-pointer">
               <Link href="/pricing">Pricing</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="cursor-pointer">
