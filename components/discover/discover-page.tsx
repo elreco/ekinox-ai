@@ -30,9 +30,7 @@ import { cn, formatTimeAgo } from '@/lib/utils'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Card
-} from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

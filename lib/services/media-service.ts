@@ -4,7 +4,7 @@ import { SearchResults } from '@/lib/types'
 function getCountryName(countryCode: string): string {
   const countryNames: Record<string, string> = {
     US: 'United States',
-    GB: 'United Kingdom', 
+    GB: 'United Kingdom',
     CA: 'Canada',
     AU: 'Australia',
     FR: 'France',
@@ -514,4 +514,9 @@ function getLocalizedQueries(countryName: string, language: string) {
   return queries[language] || fallbackQueries
 }
 
-export { getCountryFromLocale, getCountryLanguage,getCountryName, getTrendingMedia }
+export {
+  getCountryFromLocale,
+  getCountryLanguage,
+  getCountryName,
+  getTrendingMedia
+}

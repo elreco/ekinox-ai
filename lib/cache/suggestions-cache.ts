@@ -1,6 +1,9 @@
 import { unstable_cache } from 'next/cache'
 
-import { getTrendingSuggestions, type SuggestionItem } from '@/lib/services/suggestions-service'
+import {
+  getTrendingSuggestions,
+  type SuggestionItem
+} from '@/lib/services/suggestions-service'
 
 // Cache duration: 24 hours (86400 seconds)
 const CACHE_DURATION = 24 * 60 * 60 // 24 hours in seconds
@@ -12,12 +15,14 @@ export const getCachedSuggestions = unstable_cache(
   async (): Promise<SuggestionItem[]> => {
     console.log(`🔄 Fetching fresh trending suggestions from Tavily API...`)
     const startTime = Date.now()
-    
+
     try {
       const suggestions = await getTrendingSuggestions()
       const endTime = Date.now()
-      
-      console.log(`✅ Successfully fetched ${suggestions.length} trending suggestions in ${endTime - startTime}ms`)
+
+      console.log(
+        `✅ Successfully fetched ${suggestions.length} trending suggestions in ${endTime - startTime}ms`
+      )
       return suggestions
     } catch (error) {
       console.error('❌ Error fetching suggestions from cache:', error)

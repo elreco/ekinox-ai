@@ -42,7 +42,7 @@ async function getTrendingSuggestions(): Promise<SuggestionItem[]> {
       .sort(() => Math.random() - 0.5)
       .slice(0, 6)
 
-    const suggestionPromises = selectedQueries.map(async (query) => {
+    const suggestionPromises = selectedQueries.map(async query => {
       try {
         const response = await fetch('https://api.tavily.com/search', {
           method: 'POST',
@@ -66,12 +66,12 @@ async function getTrendingSuggestions(): Promise<SuggestionItem[]> {
         }
 
         const data: SearchResults = await response.json()
-        
+
         return data.results.map(result => {
           // Create engaging questions from titles
           const title = result.title
           const suggestion = generateSuggestionFromTitle(title)
-          
+
           return {
             heading: suggestion,
             message: suggestion
@@ -95,9 +95,10 @@ async function getTrendingSuggestions(): Promise<SuggestionItem[]> {
     const uniqueSuggestions = removeDuplicates(allSuggestions)
     const selectedSuggestions = selectBestSuggestions(uniqueSuggestions, 4)
 
-    console.log(`Successfully generated ${selectedSuggestions.length} trending suggestions`)
+    console.log(
+      `Successfully generated ${selectedSuggestions.length} trending suggestions`
+    )
     return selectedSuggestions
-
   } catch (error) {
     console.error('Error fetching trending suggestions:', error)
     return getFallbackSuggestions()
@@ -134,16 +135,22 @@ function generateSuggestionFromTitle(title: string): string {
     return `Compare: ${cleanTitle}`
   }
 
-  if (cleanTitle.toLowerCase().includes('announces') || cleanTitle.toLowerCase().includes('launches')) {
+  if (
+    cleanTitle.toLowerCase().includes('announces') ||
+    cleanTitle.toLowerCase().includes('launches')
+  ) {
     return `What did ${cleanTitle.split(' ')[0]} announce?`
   }
 
   // For general topics, use appropriate question starter
-  const randomStarter = questionStarters[Math.floor(Math.random() * questionStarters.length)]
-  
+  const randomStarter =
+    questionStarters[Math.floor(Math.random() * questionStarters.length)]
+
   // Limit length to keep suggestions concise
   const suggestion = `${randomStarter} ${cleanTitle}`.substring(0, 80)
-  return suggestion.endsWith('...') ? suggestion : suggestion + (suggestion.length >= 77 ? '...' : '')
+  return suggestion.endsWith('...')
+    ? suggestion
+    : suggestion + (suggestion.length >= 77 ? '...' : '')
 }
 
 function removeDuplicates(suggestions: SuggestionItem[]): SuggestionItem[] {
@@ -158,7 +165,10 @@ function removeDuplicates(suggestions: SuggestionItem[]): SuggestionItem[] {
   })
 }
 
-function selectBestSuggestions(suggestions: SuggestionItem[], count: number): SuggestionItem[] {
+function selectBestSuggestions(
+  suggestions: SuggestionItem[],
+  count: number
+): SuggestionItem[] {
   // Score suggestions based on engagement potential
   const scoredSuggestions = suggestions.map(suggestion => ({
     ...suggestion,
@@ -177,22 +187,63 @@ function calculateSuggestionScore(heading: string): number {
 
   // Prefer questions
   if (heading.includes('?')) score += 20
-  
+
   // Prefer diverse trending topics
   const trendingWords = [
-    'AI', 'Bitcoin', 'Tesla', 'Apple', 'Google', 'Meta', 'OpenAI', 'ChatGPT', 'DeepSeek', 'Nvidia', // Tech
-    'Olympics', 'World Cup', 'NBA', 'FIFA', 'Champions League', // Sports
-    'Netflix', 'Disney', 'Marvel', 'Hollywood', 'Oscar', // Entertainment
-    'Climate', 'Election', 'Trump', 'Biden', 'Ukraine', 'China', // News/Politics
-    'Health', 'COVID', 'Vaccine', 'Diet', 'Fitness', // Health
-    'Travel', 'Tourism', 'Fashion', 'Food', 'Recipe' // Lifestyle
+    'AI',
+    'Bitcoin',
+    'Tesla',
+    'Apple',
+    'Google',
+    'Meta',
+    'OpenAI',
+    'ChatGPT',
+    'DeepSeek',
+    'Nvidia', // Tech
+    'Olympics',
+    'World Cup',
+    'NBA',
+    'FIFA',
+    'Champions League', // Sports
+    'Netflix',
+    'Disney',
+    'Marvel',
+    'Hollywood',
+    'Oscar', // Entertainment
+    'Climate',
+    'Election',
+    'Trump',
+    'Biden',
+    'Ukraine',
+    'China', // News/Politics
+    'Health',
+    'COVID',
+    'Vaccine',
+    'Diet',
+    'Fitness', // Health
+    'Travel',
+    'Tourism',
+    'Fashion',
+    'Food',
+    'Recipe' // Lifestyle
   ]
-  const hasTerendingWord = trendingWords.some(word => heading.toLowerCase().includes(word.toLowerCase()))
+  const hasTerendingWord = trendingWords.some(word =>
+    heading.toLowerCase().includes(word.toLowerCase())
+  )
   if (hasTerendingWord) score += 15
 
   // Prefer action words
-  const actionWords = ['announces', 'launches', 'reveals', 'breakthrough', 'develops', 'creates']
-  const hasActionWord = actionWords.some(word => heading.toLowerCase().includes(word))
+  const actionWords = [
+    'announces',
+    'launches',
+    'reveals',
+    'breakthrough',
+    'develops',
+    'creates'
+  ]
+  const hasActionWord = actionWords.some(word =>
+    heading.toLowerCase().includes(word)
+  )
   if (hasActionWord) score += 10
 
   // Penalize very long suggestions
@@ -242,9 +293,7 @@ function getFallbackSuggestions(): SuggestionItem[] {
   ]
 
   // Return 4 random suggestions from fallback
-  return todayVariations
-    .sort(() => Math.random() - 0.5)
-    .slice(0, 4)
+  return todayVariations.sort(() => Math.random() - 0.5).slice(0, 4)
 }
 
 export { getTrendingSuggestions }

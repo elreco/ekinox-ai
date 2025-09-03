@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 
 import { Message } from 'ai'
 import { ArrowUp, ChevronDown, MessageCirclePlus, Square } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { type SuggestionItem } from '@/lib/services/suggestions-service'
 import { Model } from '@/lib/types/models'
@@ -13,6 +14,8 @@ import { cn } from '@/lib/utils'
 
 import { useArtifact } from './artifact/artifact-context'
 import { Button } from './ui/button'
+import { FilePreview } from './ui/file-preview'
+import { FileUpload, type UploadedFile } from './ui/file-upload'
 import { IconLogo } from './ui/icons'
 import { EmptyScreen } from './empty-screen'
 import { ModelSelector } from './model-selector'
@@ -52,6 +55,18 @@ export function ChatPanel({
   scrollContainerRef
 }: ChatPanelProps) {
   const [showEmptyScreen, setShowEmptyScreen] = useState(false)
+  const [attachedFiles, setAttachedFiles] = useState<UploadedFile[]>([])
+  const [hasRejectedFiles, setHasRejectedFiles] = useState(false)
+
+  const handleRemoveFile = (id: string) => {
+    const updatedFiles = attachedFiles.filter(f => {
+      if (f.id === id && f.preview) {
+        URL.revokeObjectURL(f.preview)
+      }
+      return f.id !== id
+    })
+    setAttachedFiles(updatedFiles)
+  }
   const router = useRouter()
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const isFirstRender = useRef(true)
@@ -67,6 +82,98 @@ export function ChatPanel({
     setTimeout(() => {
       setEnterDisabled(false)
     }, 300)
+  }
+
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+
+    // Don't submit if both input and files are empty
+    if (input.trim().length === 0 && attachedFiles.length === 0) {
+      return
+    }
+
+    // If user tried to upload files but they were all rejected, don't allow submission
+    if (
+      hasRejectedFiles &&
+      attachedFiles.length === 0 &&
+      input.trim().length === 0
+    ) {
+      toast.error('No valid content to send', {
+        description: 'Please add valid files or enter text before sending.'
+      })
+      return
+    }
+
+    // If there are attached files, convert them to attachments format
+    if (attachedFiles.length > 0) {
+      try {
+        const attachments = await Promise.all(
+          attachedFiles.map(async uploadedFile => {
+            // Convert File to base64 data URL
+            return new Promise(resolve => {
+              const reader = new FileReader()
+              reader.onload = () => {
+                resolve({
+                  name: uploadedFile.file.name,
+                  contentType: uploadedFile.file.type,
+                  url: reader.result as string
+                })
+              }
+              reader.readAsDataURL(uploadedFile.file)
+            })
+          })
+        )
+
+        // Clear attached files and input
+        setAttachedFiles([])
+
+        // Send message with attachments using Vercel AI SDK
+        append({
+          role: 'user',
+          content: input,
+          experimental_attachments: attachments
+        })
+
+        // Clear input
+        const clearEvent = {
+          target: { value: '' }
+        } as React.ChangeEvent<HTMLTextAreaElement>
+        handleInputChange(clearEvent)
+      } catch (error) {
+        console.error('File attachment error:', error)
+
+        // Better error handling with toast or inline message
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error occurred'
+
+        // Clear files and reset UI on error
+        setAttachedFiles([])
+        setHasRejectedFiles(true)
+
+        // Reset to home screen
+        setTimeout(() => {
+          const clearEvent = {
+            target: { value: '' }
+          } as React.ChangeEvent<HTMLTextAreaElement>
+          handleInputChange(clearEvent)
+          setShowEmptyScreen(false)
+          if (inputRef.current) {
+            inputRef.current.blur()
+          }
+        }, 100)
+
+        // Show a proper error notification
+        toast.error('File upload failed', {
+          description: errorMessage
+        })
+
+        // Don't proceed with submission
+        return
+      }
+    } else {
+      // No files, proceed with normal submission
+      handleSubmit(e)
+    }
   }
 
   const handleNewChat = () => {
@@ -128,7 +235,7 @@ export function ChatPanel({
         </div>
       )}
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleFormSubmit}
         className={cn('max-w-3xl w-full mx-auto relative')}
       >
         {/* Scroll to bottom button - only shown when showScrollToBottomButton is true */}
@@ -146,6 +253,16 @@ export function ChatPanel({
         )}
 
         <div className="relative flex flex-col w-full gap-2 rounded-3xl bg-muted border border-foreground/10">
+          {/* File Preview */}
+          {attachedFiles.length > 0 && (
+            <div className="border-b border-border/50">
+              <FilePreview
+                files={attachedFiles}
+                onRemoveFile={handleRemoveFile}
+              />
+            </div>
+          )}
+
           <Textarea
             ref={inputRef}
             name="input"
@@ -162,6 +279,10 @@ export function ChatPanel({
             onChange={e => {
               handleInputChange(e)
               setShowEmptyScreen(e.target.value.length === 0)
+              // Reset rejection state when user types
+              if (e.target.value.trim().length > 0) {
+                setHasRejectedFiles(false)
+              }
             }}
             onKeyDown={e => {
               if (
@@ -186,6 +307,42 @@ export function ChatPanel({
           {/* Bottom menu area */}
           <div className="flex items-center justify-between p-3">
             <div className="flex items-center gap-2">
+              <FileUpload
+                onFilesChange={files => {
+                  setAttachedFiles(files)
+                  // Reset rejection state when valid files are added
+                  if (files.length > 0) {
+                    setHasRejectedFiles(false)
+                  }
+                }}
+                currentFiles={attachedFiles}
+                maxFiles={5}
+                maxSize={10 * 1024 * 1024} // 10MB
+                onFileRejection={() => {
+                  setHasRejectedFiles(true)
+
+                  // IMMEDIATELY clear files to prevent them from showing
+                  setAttachedFiles([])
+
+                  // Use setTimeout to ensure this happens after the alert
+                  setTimeout(() => {
+                    // Complete reset to initial state
+                    const clearEvent = {
+                      target: { value: '' }
+                    } as React.ChangeEvent<HTMLTextAreaElement>
+                    handleInputChange(clearEvent)
+
+                    // Force complete UI reset
+                    setShowEmptyScreen(false)
+                    setAttachedFiles([]) // Double-clear to be sure
+
+                    // Blur the input
+                    if (inputRef.current) {
+                      inputRef.current.blur()
+                    }
+                  }, 100)
+                }}
+              />
               <ModelSelector models={models || []} />
               <SearchModeToggle />
             </div>

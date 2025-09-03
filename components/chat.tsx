@@ -64,7 +64,7 @@ export function Chat({
     onError: error => {
       toast.error(`Error in chat: ${error.message}`)
     },
-    sendExtraMessageFields: false, // Disable extra message fields,
+    sendExtraMessageFields: true, // Enable attachments
     experimental_throttle: 100
   })
 

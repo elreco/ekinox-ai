@@ -2,24 +2,59 @@
 
 import React, { useState } from 'react'
 import TextareaAutosize from 'react-textarea-autosize'
+import Image from 'next/image'
 
-import { Pencil } from 'lucide-react'
+import { File, FileText, Image as ImageIcon, Pencil } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { CollapsibleMessage } from './collapsible-message'
+
+// Helper function to get file icon based on content type
+const getFileIcon = (contentType: string) => {
+  if (contentType.startsWith('image/')) return ImageIcon
+  if (
+    contentType.includes('pdf') ||
+    contentType.includes('document') ||
+    contentType.includes('text')
+  )
+    return FileText
+  return File
+}
+
+// Helper function to format file size from data URL
+const getFileSizeFromDataURL = (dataUrl: string): string => {
+  try {
+    const base64 = dataUrl.split(',')[1]
+    const bytes = (base64.length * 3) / 4
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  } catch {
+    return 'Unknown size'
+  }
+}
 
 type UserMessageProps = {
   message: string
   messageId?: string
   onUpdateMessage?: (messageId: string, newContent: string) => Promise<void>
+  attachments?: Array<{
+    name: string
+    contentType: string
+    url: string
+  }>
 }
 
 export const UserMessage: React.FC<UserMessageProps> = ({
   message,
   messageId,
-  onUpdateMessage
+  onUpdateMessage,
+  attachments
 }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState(message)
@@ -73,7 +108,63 @@ export const UserMessage: React.FC<UserMessageProps> = ({
           </div>
         ) : (
           <div className="flex justify-between items-start">
-            <div className="flex-1">{message}</div>
+            <div className="flex-1 space-y-2">
+              {/* Message text */}
+              <div>{message}</div>
+
+              {/* Attachments display */}
+              {attachments && attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {attachments.map((attachment, index) => {
+                    const IconComponent = getFileIcon(attachment.contentType)
+                    const isImage = attachment.contentType.startsWith('image/')
+
+                    return (
+                      <div
+                        key={index}
+                        className="relative flex items-center gap-2 bg-muted/50 rounded-lg p-2 border group hover:bg-muted/80 transition-colors max-w-xs"
+                      >
+                        <div className="flex-shrink-0">
+                          {isImage ? (
+                            <div className="relative w-8 h-8 rounded overflow-hidden">
+                              <Image
+                                src={attachment.url}
+                                alt={attachment.name}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 flex items-center justify-center bg-muted rounded">
+                              <IconComponent className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate text-foreground">
+                            {attachment.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Badge
+                              variant="outline"
+                              className="text-xs h-4 px-1.5"
+                            >
+                              {attachment.contentType.split('/')[0]}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {getFileSizeFromDataURL(attachment.url)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
             <div
               className={cn(
                 'absolute top-1 right-1 transition-opacity ml-2',
