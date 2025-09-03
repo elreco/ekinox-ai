@@ -48,14 +48,14 @@ export default function AppSidebar({ user }: AppSidebarProps) {
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
+          {/* <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link href="/discover" className="flex items-center gap-2">
                 <Search className="size-4" />
                 <span>Discover</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>
+          </SidebarMenuItem> */}
         </SidebarMenu>
         <div className="flex-1 overflow-y-auto">
           <Suspense fallback={<ChatHistorySkeleton />}>

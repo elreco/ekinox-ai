@@ -4,7 +4,6 @@ User-agent: *
 Allow: /
 
 # Important pages
-Allow: /discover
 Allow: /search
 Allow: /pricing
 
@@ -12,6 +11,9 @@ Allow: /pricing
 Disallow: /auth/
 Disallow: /dashboard/
 Disallow: /api/
+
+# Temporarily disable discover page from indexing
+Disallow: /discover
 
 # Sitemap location
 Sitemap: https://www.ekinox.app/sitemap.xml

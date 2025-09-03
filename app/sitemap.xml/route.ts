@@ -10,12 +10,12 @@ export function GET() {
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  <url>
+  <!-- <url>
     <loc>${baseUrl}/discover</loc>
     <lastmod>${currentDate}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
-  </url>
+  </url> -->
   <url>
     <loc>${baseUrl}/search</loc>
     <lastmod>${currentDate}</lastmod>
