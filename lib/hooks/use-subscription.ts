@@ -23,15 +23,11 @@ export function useSubscription() {
           return
         }
 
-        console.log('Fetching subscription for user:', user.id)
-
         // Essayer d'abord sans .single() pour debug
         const { data: allData, error: allError } = await supabase
           .from('user_subscriptions')
           .select('*')
           .eq('user_id', user.id)
-
-        console.log('All subscriptions query:', { allData, allError })
 
         if (allError) {
           console.error('Subscription fetch error:', allError)
@@ -42,11 +38,6 @@ export function useSubscription() {
         // Prendre la première subscription si elle existe
         const subscription = allData && allData.length > 0 ? allData[0] : null
 
-        console.log('Selected subscription:', subscription)
-        console.log(
-          'Environment PRICE_ID:',
-          process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
-        )
         setSubscription(subscription)
       } catch (err) {
         setError('Failed to fetch subscription')
@@ -83,13 +74,6 @@ export function useSubscription() {
   const isPro =
     subscription?.stripe_price_id ===
     process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
-
-  console.log('useSubscription debug:', {
-    subscription: !!subscription,
-    status: subscription?.status,
-    isActive,
-    isSubscribed: !!subscription && isActive
-  })
 
   return {
     subscription,

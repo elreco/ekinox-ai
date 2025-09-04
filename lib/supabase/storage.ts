@@ -140,6 +140,13 @@ export class SupabaseStorageService {
       isSupabaseFile: boolean
     }
   } {
+    // Handle new content fragment format
+    const fragmentIndex = url.indexOf('#content=')
+    if (fragmentIndex !== -1) {
+      return { cleanUrl: url.substring(0, fragmentIndex) }
+    }
+
+    // Handle old metadata format
     const metadataPrefix = '#supabase-meta:'
     const metadataIndex = url.indexOf(metadataPrefix)
 

@@ -1,9 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
 import { Mic, MicOff } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { cn } from '@/lib/utils'
 
@@ -22,11 +22,25 @@ interface SpeechRecognition extends EventTarget {
   start(): void
   stop(): void
   abort(): void
+  onstart: ((this: SpeechRecognition, ev: Event) => any) | null
+  onend: ((this: SpeechRecognition, ev: Event) => any) | null
+  onabort: ((this: SpeechRecognition, ev: Event) => any) | null
+  onresult:
+    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any)
+    | null
+  onerror:
+    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any)
+    | null
 }
 
 interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList
   resultIndex: number
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string
+  message: string
 }
 
 interface Window {
@@ -73,8 +87,8 @@ export function VoiceInput({
         setIsListening(false)
       }
 
-      recognition.onresult = (event: Event) => {
-        const speechEvent = event as SpeechRecognitionEvent
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const speechEvent = event
         let finalTranscript = ''
         let interimTranscript = ''
 
@@ -96,7 +110,7 @@ export function VoiceInput({
         }
       }
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error)
         setIsListening(false)
 

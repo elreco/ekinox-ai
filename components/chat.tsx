@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import { CHAT_ID } from '@/lib/constants'
 import { type SuggestionItem } from '@/lib/services/suggestions-service'
 import { Model } from '@/lib/types/models'
-import { cn } from '@/lib/utils'
+import { cn, convertToExtendedCoreMessages } from '@/lib/utils'
 
 import { ChatMessages } from './chat-messages'
 import { ChatPanel } from './chat-panel'
@@ -153,28 +153,58 @@ export function Chat({
     messageId: string,
     newContent: string
   ) => {
-    setMessages(currentMessages =>
-      currentMessages.map(msg =>
+    let updatedMessages: Message[] = []
+
+    setMessages(currentMessages => {
+      updatedMessages = currentMessages.map(msg =>
         msg.id === messageId ? { ...msg, content: newContent } : msg
       )
-    )
+      return updatedMessages
+    })
 
     try {
-      const messageIndex = messages.findIndex(msg => msg.id === messageId)
+      const messageIndex = updatedMessages.findIndex(
+        msg => msg.id === messageId
+      )
       if (messageIndex === -1) return
 
-      const messagesUpToEdited = messages.slice(0, messageIndex + 1)
+      const messagesUpToEdited = updatedMessages.slice(0, messageIndex + 1)
 
       setMessages(messagesUpToEdited)
 
+      // Save the updated messages to database via API
+      try {
+        const extendedMessages =
+          convertToExtendedCoreMessages(messagesUpToEdited)
+        const response = await fetch('/api/chats', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id,
+            messages: extendedMessages,
+            title: messagesUpToEdited[0]?.content || 'Chat'
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error(`Failed to save: ${response.statusText}`)
+        }
+      } catch (saveError) {
+        console.error('Failed to save updated message:', saveError)
+        toast.error('Failed to save message changes')
+      }
+
       setData(undefined)
 
-      await reload({
-        body: {
-          chatId: id,
-          regenerate: true
-        }
-      })
+      // Wait a bit for state to update, then reload
+      setTimeout(async () => {
+        await reload({
+          body: {
+            chatId: id,
+            regenerate: true
+          }
+        })
+      }, 100)
     } catch (error) {
       console.error('Failed to reload after message update:', error)
       toast.error(`Failed to reload conversation: ${(error as Error).message}`)

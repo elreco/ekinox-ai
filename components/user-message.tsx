@@ -6,12 +6,12 @@ import Image from 'next/image'
 
 import { File, FileText, Image as ImageIcon, Pencil } from 'lucide-react'
 
+import { SupabaseStorageService } from '@/lib/supabase/storage'
 import { cn } from '@/lib/utils'
 
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { CollapsibleMessage } from './collapsible-message'
-import { SupabaseStorageService } from '@/lib/supabase/storage'
 
 // Helper function to get file icon based on content type
 const getFileIcon = (contentType: string) => {
@@ -76,79 +76,19 @@ export const UserMessage: React.FC<UserMessageProps> = ({
   const [isEditing, setIsEditing] = useState(false)
   const [editedContent, setEditedContent] = useState('')
 
-  // Parse the message to separate user text from file content
-  const { userText, parsedAttachments } = React.useMemo(() => {
-    // If we have proper attachments, use them
-    if (attachments && attachments.length > 0) {
-      return { userText: message, parsedAttachments: attachments }
-    }
-
-    // If no attachments but message contains file content, parse it
-    // Look for common file patterns in the message
-    const lines = message.split('\n')
-    let userText = ''
-    const foundFiles: Array<{
-      name: string
-      contentType: string
-      url: string
-      content: string
-    }> = []
-
-    let currentFile: { name?: string; contentType?: string; content: string[] } | null = null
-    let isInFileContent = false
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i]
-      
-      // Detect CSS file content
-      if (line.includes('@tailwind') || line.includes('@layer') || line.includes(':root {')) {
-        if (!isInFileContent) {
-          // Extract user text before file content
-          const beforeFile = lines.slice(0, i).join('\n').trim()
-          if (beforeFile && !beforeFile.match(/^[@\-\w\s{}.%:;()]+$/)) {
-            userText = beforeFile
-          }
-          
-          isInFileContent = true
-          currentFile = {
-            name: 'globals.css',
-            contentType: 'text/css',
-            content: []
-          }
-        }
-      }
-      
-      if (isInFileContent && currentFile) {
-        currentFile.content.push(line)
-      }
-    }
-
-    if (currentFile) {
-      const fileContent = currentFile.content.join('\n')
-      const dataUrl = `data:${currentFile.contentType};base64,${btoa(fileContent)}`
-      
-      foundFiles.push({
-        name: currentFile.name!,
-        contentType: currentFile.contentType!,
-        url: dataUrl,
-        content: fileContent // Add content property for reconstruction
-      } as any) // Type assertion since we're extending the interface
-    }
-
-    // If no files found, return original message
-    if (foundFiles.length === 0) {
-      return { userText: message, parsedAttachments: [] }
-    }
-
-    return { 
-      userText: userText || 'Uploaded file',
-      parsedAttachments: foundFiles 
+  // Simple display: message text and attachments separately (no content mixing)
+  const { userText, detectedFiles } = React.useMemo(() => {
+    // With the fixed streaming, message should now contain only user text
+    // and attachments should be completely separate
+    return {
+      userText: message,
+      detectedFiles: attachments || []
     }
   }, [message, attachments])
 
   const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
-    setEditedContent(userText) // Use only the user text, not the full message with file content
+    setEditedContent(message) // Use the message content for editing
     setIsEditing(true)
   }
 
@@ -162,19 +102,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({
     setIsEditing(false)
 
     try {
-      // If we have parsed attachments, reconstruct the full message
-      let fullMessage = editedContent
-      
-      if (parsedAttachments && parsedAttachments.length > 0) {
-        // Add file content back to maintain the original message structure
-        parsedAttachments.forEach(attachment => {
-          if ((attachment as any).content) {
-            fullMessage += '\n' + (attachment as any).content
-          }
-        })
-      }
-      
-      await onUpdateMessage(messageId, fullMessage)
+      await onUpdateMessage(messageId, editedContent)
     } catch (error) {
       console.error('Failed to save message:', error)
     }
@@ -212,27 +140,16 @@ export const UserMessage: React.FC<UserMessageProps> = ({
               <div>{userText}</div>
 
               {/* Attachments display */}
-              {parsedAttachments && parsedAttachments.length > 0 && (
+              {detectedFiles && detectedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {parsedAttachments.map((attachment, index) => {
-                    console.log('🔍 Rendering parsed attachment:', {
-                      attachment,
-                      url: attachment.url,
-                      name: attachment.name,
-                      contentType: attachment.contentType
-                    })
-                    
+                  {detectedFiles.map((attachment, index) => {
                     // Try to get enriched metadata from Supabase URL
                     const { cleanUrl, metadata } =
                       SupabaseStorageService.parseEnrichedUrl(attachment.url)
-                    
-                    console.log('🔍 Parsed URL:', { cleanUrl, metadata })
-                    
+
                     const displayName = metadata?.name || attachment.name
                     const displayContentType =
                       metadata?.contentType || attachment.contentType
-                    
-                    console.log('🔍 Display info:', { displayName, displayContentType })
 
                     const IconComponent = getFileIcon(displayContentType)
                     const isImage = displayContentType.startsWith('image/')

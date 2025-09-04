@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 const ALLOWED_TYPES = [
+  // Images
   'image/jpeg',
   'image/png',
   'image/gif',
   'image/webp',
+  'image/svg+xml',
+  'image/bmp',
+  'image/tiff',
+
+  // Documents
   'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+
+  // Text files
   'text/plain',
   'text/markdown',
   'text/csv',
@@ -14,16 +28,50 @@ const ALLOWED_TYPES = [
   'text/javascript',
   'text/html',
   'text/xml',
+  'text/yaml',
+  'text/x-python',
+  'text/x-java-source',
+  'text/x-c',
+  'text/x-c++src',
+  'text/x-csharp',
+  'text/x-php',
+  'text/x-ruby',
+  'text/x-go',
+  'text/x-rust',
+  'text/x-swift',
+  'text/x-kotlin',
+  'text/x-scala',
+  'text/x-sql',
+  'text/x-shellscript',
+
+  // Data formats
   'application/json',
   'application/javascript',
   'application/xml',
   'application/yaml',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/vnd.ms-powerpoint',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  'application/x-yaml',
+  'application/toml',
+  'application/x-toml',
+
+  // Archives
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/x-rar-compressed',
+  'application/x-tar',
+  'application/gzip',
+
+  // Audio/Video
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'audio/mp4',
+  'video/mp4',
+  'video/mpeg',
+  'video/quicktime',
+  'video/x-msvideo',
+
+  // Other
+  'application/octet-stream'
 ]
 
 export interface ProcessedFile {

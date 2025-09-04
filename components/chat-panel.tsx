@@ -17,8 +17,8 @@ import { useArtifact } from './artifact/artifact-context'
 import { Button } from './ui/button'
 import { FilePreview } from './ui/file-preview'
 import { FileUpload, type UploadedFile } from './ui/file-upload'
-import { VoiceInput } from './ui/voice-input'
 import { IconLogo } from './ui/icons'
+import { VoiceInput } from './ui/voice-input'
 import { EmptyScreen } from './empty-screen'
 import { ModelSelector } from './model-selector'
 import { SearchModeToggle } from './search-mode-toggle'
@@ -183,61 +183,45 @@ export function ChatPanel({
       }
 
       try {
-        // Upload files to Supabase Storage and prepare for AI
+        // With AI SDK v5, we can handle files more directly
         const attachments = await Promise.all(
           attachedFiles.map(async uploadedFile => {
-            const isImage = uploadedFile.file.type.startsWith('image/')
-            
             try {
               // Upload to Supabase Storage for persistence
               const supabaseFile = await storageService.uploadFile(
                 uploadedFile.file
               )
-              
-              if (isImage) {
-                // For images, use the Supabase URL directly
+
+              // For AI SDK v5, we use the file content directly
+              if (uploadedFile.file.type.startsWith('image/')) {
+                // For images, use the Supabase URL
                 return {
                   name: uploadedFile.file.name,
                   contentType: uploadedFile.file.type,
                   url: supabaseFile.url
                 }
               } else {
-                // For non-images (text files like CSS, JS, etc.), convert to text content
-                const textContent = await new Promise<string>((resolve, reject) => {
-                  const reader = new FileReader()
-                  reader.onload = () => resolve(reader.result as string)
-                  reader.onerror = reject
-                  reader.readAsText(uploadedFile.file)
-                })
-                
-                // Create a data URL with the text content for AI processing
-                const dataUrl = `data:${uploadedFile.file.type};base64,${btoa(textContent)}`
-                
+                // For non-image files, convert to base64 for AI SDK v5
+                const arrayBuffer = await uploadedFile.file.arrayBuffer()
+                const base64Content =
+                  Buffer.from(arrayBuffer).toString('base64')
+                const dataUrl = `data:${uploadedFile.file.type};base64,${base64Content}`
+
                 return {
                   name: uploadedFile.file.name,
                   contentType: uploadedFile.file.type,
-                  url: dataUrl // Use base64 for text files to avoid AI API issues
+                  url: dataUrl
                 }
               }
             } catch (error) {
               console.error(
-                '❌ Supabase upload failed for file:',
+                '❌ File processing failed for:',
                 uploadedFile.file.name,
                 error
               )
 
-              // Fallback: Always use base64 for compatibility
-              return new Promise(resolve => {
-                const reader = new FileReader()
-                reader.onload = () => {
-                  resolve({
-                    name: uploadedFile.file.name,
-                    contentType: uploadedFile.file.type,
-                    url: reader.result as string
-                  })
-                }
-                reader.readAsDataURL(uploadedFile.file)
-              })
+              // Fallback: If processing fails, show error and don't send file
+              throw new Error(`Failed to process ${uploadedFile.file.name}`)
             }
           })
         )
@@ -245,12 +229,63 @@ export function ChatPanel({
         // Clear attached files and input
         setAttachedFiles([])
 
-        // Send message with attachments using Vercel AI SDK
+        // Send message with file content for AI, but clean UI display
         append({
           role: 'user',
-          content: input,
-          experimental_attachments: attachments
-        })
+          content: input, // Keep the original input for UI display
+          // Store file contents in data for server processing
+          data: {
+            fileContents: attachments.map(attachment => {
+              if (attachment.contentType?.startsWith('image/')) {
+                return {
+                  name: attachment.name,
+                  type: attachment.contentType,
+                  content: `[Image: ${attachment.name}]`,
+                  isImage: true
+                }
+              } else if (attachment.url.startsWith('data:')) {
+                try {
+                  const [header, data] = attachment.url.split(',')
+                  const content = Buffer.from(data, 'base64').toString('utf-8')
+                  return {
+                    name: attachment.name,
+                    type: attachment.contentType,
+                    content: content,
+                    isImage: false
+                  }
+                } catch (error) {
+                  console.error('Error decoding file content:', error)
+                  return {
+                    name: attachment.name,
+                    type: attachment.contentType,
+                    content: '[Error reading file content]',
+                    isImage: false
+                  }
+                }
+              } else {
+                return {
+                  name: attachment.name,
+                  type: attachment.contentType,
+                  content: '[File content not available]',
+                  isImage: false
+                }
+              }
+            }),
+            supabaseFiles: attachedFiles.map(f => ({
+              id: f.id,
+              name: f.file.name,
+              type: f.file.type,
+              size: f.file.size,
+              supabaseUrl: attachments.find(a => a.name === f.file.name)?.url
+            }))
+          },
+          // Keep experimental_attachments for UI display
+          experimental_attachments: attachments.map(attachment => ({
+            name: attachment.name,
+            contentType: attachment.contentType,
+            url: attachment.url
+          }))
+        } as any)
 
         // Clear input
         const clearEvent = {

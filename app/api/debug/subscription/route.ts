@@ -18,14 +18,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    console.log('DEBUG: Fetching subscription for user:', user.id)
-
     const { data, error } = await supabase
       .from('user_subscriptions')
       .select('*')
       .eq('user_id', user.id)
-
-    console.log('DEBUG: Query result:', { data, error })
 
     return NextResponse.json({
       user: { id: user.id, email: user.email },

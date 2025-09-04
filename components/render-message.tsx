@@ -100,18 +100,35 @@ export function RenderMessage({
   }, [reasoningAnnotation])
 
   if (message.role === 'user') {
-    console.log('🔍 User message after refresh:', {
-      content: message.content,
-      attachments: (message as any).experimental_attachments,
-      fullMessage: message
-    })
-    
+    // Get file metadata from message.data.supabaseFiles if available
+    const fileMetadata = (message as any).data?.supabaseFiles || []
+
+    // If we don't have experimental_attachments but have file metadata, reconstruct them
+    let attachments = (message as any).experimental_attachments
+
+    if (!attachments && fileMetadata.length > 0) {
+      attachments = fileMetadata.map((file: any) => ({
+        name: file.name,
+        contentType: file.type,
+        url: file.supabaseUrl
+      }))
+    }
+
+    // Always try to reconstruct if we have fileMetadata (prioritize reconstructed over original)
+    if (fileMetadata.length > 0) {
+      attachments = fileMetadata.map((file: any) => ({
+        name: file.name,
+        contentType: file.type,
+        url: file.supabaseUrl || file.url
+      }))
+    }
+
     return (
       <UserMessage
         message={message.content}
         messageId={messageId}
         onUpdateMessage={onUpdateMessage}
-        attachments={(message as any).experimental_attachments}
+        attachments={attachments}
       />
     )
   }

@@ -6,7 +6,6 @@ import { Paperclip } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { cn } from '@/lib/utils'
-import { storageService } from '@/lib/supabase/storage'
 
 import { Button } from './button'
 import { type UploadedFile } from './file-preview'
@@ -55,7 +54,40 @@ export function FileUpload({
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     'application/vnd.ms-powerpoint',
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/octet-stream',
+    'audio/*',
+    'video/*',
+    '.py',
+    '.js',
+    '.ts',
+    '.jsx',
+    '.tsx',
+    '.java',
+    '.cpp',
+    '.c',
+    '.h',
+    '.cs',
+    '.php',
+    '.rb',
+    '.go',
+    '.rs',
+    '.swift',
+    '.kt',
+    '.scala',
+    '.sql',
+    '.sh',
+    '.bat',
+    '.ps1',
+    '.dockerfile',
+    '.yaml',
+    '.yml',
+    '.toml',
+    '.ini',
+    '.cfg',
+    '.conf'
   ],
   className,
   onFileRejection

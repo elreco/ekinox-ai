@@ -238,7 +238,9 @@ export function convertToUIMessages(
       role: message.role,
       content: textContent,
       toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined,
-      annotations: annotations
+      annotations: annotations,
+      // Preserve custom data properties when converting back to UI messages
+      ...((message as any).data && { data: (message as any).data })
     }
 
     chatMessages.push(newMessage)
@@ -292,9 +294,20 @@ export function convertToExtendedCoreMessages(
       })
     }
 
-    // Convert current message
+    // Convert current message while preserving custom data
     const converted = convertToCoreMessages([message])
-    result.push(...converted)
+
+    // Preserve custom data properties when converting user messages
+    if (message.role === 'user' && (message as any).data) {
+      result.push(
+        ...converted.map(coreMsg => ({
+          ...coreMsg,
+          data: (message as any).data
+        }))
+      )
+    } else {
+      result.push(...converted)
+    }
   }
 
   return result

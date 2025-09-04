@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST() {
@@ -17,17 +18,23 @@ export async function POST() {
     console.log('🔐 Setting up storage policies...')
 
     // Create policy for public read access
-    const { error: readPolicyError } = await supabase.rpc('create_storage_policy', {
-      bucket_name: 'files',
-      policy_name: 'Public read access',
-      definition: 'SELECT',
-      roles: '{public}',
-      using_expression: 'true'
-    })
+    const { error: readPolicyError } = await supabase.rpc(
+      'create_storage_policy',
+      {
+        bucket_name: 'files',
+        policy_name: 'Public read access',
+        definition: 'SELECT',
+        roles: '{public}',
+        using_expression: 'true'
+      }
+    )
 
-    if (readPolicyError && !readPolicyError.message.includes('already exists')) {
+    if (
+      readPolicyError &&
+      !readPolicyError.message.includes('already exists')
+    ) {
       console.error('❌ Error creating read policy:', readPolicyError)
-      
+
       // Fallback: Try with raw SQL
       const { error: sqlError1 } = await supabase.rpc('exec_sql', {
         sql: `
@@ -36,24 +43,30 @@ export async function POST() {
           USING (bucket_id = 'files');
         `
       })
-      
+
       if (sqlError1 && !sqlError1.message.includes('already exists')) {
         console.error('❌ SQL read policy error:', sqlError1)
       }
     }
 
-    // Create policy for public insert access  
-    const { error: insertPolicyError } = await supabase.rpc('create_storage_policy', {
-      bucket_name: 'files',
-      policy_name: 'Public upload access',
-      definition: 'INSERT', 
-      roles: '{public}',
-      using_expression: 'true'
-    })
+    // Create policy for public insert access
+    const { error: insertPolicyError } = await supabase.rpc(
+      'create_storage_policy',
+      {
+        bucket_name: 'files',
+        policy_name: 'Public upload access',
+        definition: 'INSERT',
+        roles: '{public}',
+        using_expression: 'true'
+      }
+    )
 
-    if (insertPolicyError && !insertPolicyError.message.includes('already exists')) {
+    if (
+      insertPolicyError &&
+      !insertPolicyError.message.includes('already exists')
+    ) {
       console.error('❌ Error creating insert policy:', insertPolicyError)
-      
+
       // Fallback: Try with raw SQL
       const { error: sqlError2 } = await supabase.rpc('exec_sql', {
         sql: `
@@ -62,7 +75,7 @@ export async function POST() {
           WITH CHECK (bucket_id = 'files');
         `
       })
-      
+
       if (sqlError2 && !sqlError2.message.includes('already exists')) {
         console.error('❌ SQL insert policy error:', sqlError2)
       }
@@ -79,16 +92,18 @@ export async function POST() {
 
     console.log('✅ Storage policies configured')
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Storage policies configured successfully' 
+    return NextResponse.json({
+      success: true,
+      message: 'Storage policies configured successfully'
     })
-
   } catch (error) {
     console.error('❌ Policy setup error:', error)
-    return NextResponse.json({ 
-      success: false, 
-      error: `Policy setup failed: ${error}` 
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: `Policy setup failed: ${error}`
+      },
+      { status: 500 }
+    )
   }
 }
