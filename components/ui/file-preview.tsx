@@ -14,6 +14,12 @@ export interface UploadedFile {
   id: string
   preview?: string
   type: 'image' | 'document' | 'other'
+  // Supabase Storage data (optional for backward compatibility)
+  supabaseData?: {
+    path: string
+    url: string
+    uploadedAt: string
+  }
 }
 
 interface FilePreviewProps {

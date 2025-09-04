@@ -9,6 +9,7 @@ import { ArrowUp, ChevronDown, MessageCirclePlus, Square } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { type SuggestionItem } from '@/lib/services/suggestions-service'
+import { storageService } from '@/lib/supabase/storage'
 import { Model } from '@/lib/types/models'
 import { cn } from '@/lib/utils'
 
@@ -16,6 +17,7 @@ import { useArtifact } from './artifact/artifact-context'
 import { Button } from './ui/button'
 import { FilePreview } from './ui/file-preview'
 import { FileUpload, type UploadedFile } from './ui/file-upload'
+import { VoiceInput } from './ui/voice-input'
 import { IconLogo } from './ui/icons'
 import { EmptyScreen } from './empty-screen'
 import { ModelSelector } from './model-selector'
@@ -84,6 +86,26 @@ export function ChatPanel({
     }, 300)
   }
 
+  const handleVoiceTranscript = (transcript: string) => {
+    // Append the transcript to the current input
+    const newValue = input + (input ? ' ' : '') + transcript.trim()
+    const event = {
+      target: { value: newValue }
+    } as React.ChangeEvent<HTMLTextAreaElement>
+    handleInputChange(event)
+
+    // Focus the textarea to show the new text
+    if (inputRef.current) {
+      inputRef.current.focus()
+      // Move cursor to the end
+      setTimeout(() => {
+        if (inputRef.current) {
+          inputRef.current.setSelectionRange(newValue.length, newValue.length)
+        }
+      }, 0)
+    }
+  }
+
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
@@ -104,23 +126,119 @@ export function ChatPanel({
       return
     }
 
-    // If there are attached files, convert them to attachments format
+    // If there are attached files, validate them one more time before submission
     if (attachedFiles.length > 0) {
+      // Final validation check
+      const invalidFiles = attachedFiles.filter(uploadedFile => {
+        const extension =
+          uploadedFile.file.name.toLowerCase().split('.').pop() || ''
+        const supportedExtensions = [
+          'jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'webp',
+          'pdf',
+          'txt',
+          'md',
+          'js',
+          'ts',
+          'tsx',
+          'jsx',
+          'html',
+          'css',
+          'json',
+          'xml',
+          'yaml',
+          'yml',
+          'csv'
+        ]
+        return !supportedExtensions.includes(extension)
+      })
+
+      if (invalidFiles.length > 0) {
+        const errorMessages = invalidFiles.map(
+          f => `${f.file.name}: File type not supported by AI`
+        )
+        toast.error('Invalid files detected', {
+          description: errorMessages.join('\n')
+        })
+
+        // Remove invalid files and reset UI
+        setAttachedFiles([])
+        setHasRejectedFiles(true)
+
+        setTimeout(() => {
+          const clearEvent = {
+            target: { value: '' }
+          } as React.ChangeEvent<HTMLTextAreaElement>
+          handleInputChange(clearEvent)
+          setShowEmptyScreen(false)
+          if (inputRef.current) {
+            inputRef.current.blur()
+          }
+        }, 100)
+
+        return
+      }
+
       try {
+        // Upload files to Supabase Storage and prepare for AI
         const attachments = await Promise.all(
           attachedFiles.map(async uploadedFile => {
-            // Convert File to base64 data URL
-            return new Promise(resolve => {
-              const reader = new FileReader()
-              reader.onload = () => {
-                resolve({
+            const isImage = uploadedFile.file.type.startsWith('image/')
+            
+            try {
+              // Upload to Supabase Storage for persistence
+              const supabaseFile = await storageService.uploadFile(
+                uploadedFile.file
+              )
+              
+              if (isImage) {
+                // For images, use the Supabase URL directly
+                return {
                   name: uploadedFile.file.name,
                   contentType: uploadedFile.file.type,
-                  url: reader.result as string
+                  url: supabaseFile.url
+                }
+              } else {
+                // For non-images (text files like CSS, JS, etc.), convert to text content
+                const textContent = await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader()
+                  reader.onload = () => resolve(reader.result as string)
+                  reader.onerror = reject
+                  reader.readAsText(uploadedFile.file)
                 })
+                
+                // Create a data URL with the text content for AI processing
+                const dataUrl = `data:${uploadedFile.file.type};base64,${btoa(textContent)}`
+                
+                return {
+                  name: uploadedFile.file.name,
+                  contentType: uploadedFile.file.type,
+                  url: dataUrl // Use base64 for text files to avoid AI API issues
+                }
               }
-              reader.readAsDataURL(uploadedFile.file)
-            })
+            } catch (error) {
+              console.error(
+                '❌ Supabase upload failed for file:',
+                uploadedFile.file.name,
+                error
+              )
+
+              // Fallback: Always use base64 for compatibility
+              return new Promise(resolve => {
+                const reader = new FileReader()
+                reader.onload = () => {
+                  resolve({
+                    name: uploadedFile.file.name,
+                    contentType: uploadedFile.file.type,
+                    url: reader.result as string
+                  })
+                }
+                reader.readAsDataURL(uploadedFile.file)
+              })
+            }
           })
         )
 
@@ -342,6 +460,10 @@ export function ChatPanel({
                     }
                   }, 100)
                 }}
+              />
+              <VoiceInput
+                onTranscript={handleVoiceTranscript}
+                disabled={isLoading || isToolInvocationInProgress()}
               />
               <ModelSelector models={models || []} />
               <SearchModeToggle />

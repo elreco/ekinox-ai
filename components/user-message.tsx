@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import { CollapsibleMessage } from './collapsible-message'
+import { SupabaseStorageService } from '@/lib/supabase/storage'
 
 // Helper function to get file icon based on content type
 const getFileIcon = (contentType: string) => {
@@ -24,16 +25,32 @@ const getFileIcon = (contentType: string) => {
   return File
 }
 
-// Helper function to format file size from data URL
-const getFileSizeFromDataURL = (dataUrl: string): string => {
+// Helper function to format file size from data URL or enriched Supabase URL
+const getFileSizeFromUrl = (url: string): string => {
   try {
-    const base64 = dataUrl.split(',')[1]
-    const bytes = (base64.length * 3) / 4
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    // First try to parse as enriched Supabase URL
+    const { metadata } = SupabaseStorageService.parseEnrichedUrl(url)
+    if (metadata?.size) {
+      const bytes = metadata.size
+      if (bytes === 0) return '0 Bytes'
+      const k = 1024
+      const sizes = ['Bytes', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    }
+
+    // Fallback for base64 data URLs
+    if (url.startsWith('data:')) {
+      const base64 = url.split(',')[1]
+      const bytes = (base64.length * 3) / 4
+      if (bytes === 0) return '0 Bytes'
+      const k = 1024
+      const sizes = ['Bytes', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    }
+
+    return 'Unknown size'
   } catch {
     return 'Unknown size'
   }
@@ -57,11 +74,81 @@ export const UserMessage: React.FC<UserMessageProps> = ({
   attachments
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedContent, setEditedContent] = useState(message)
+  const [editedContent, setEditedContent] = useState('')
+
+  // Parse the message to separate user text from file content
+  const { userText, parsedAttachments } = React.useMemo(() => {
+    // If we have proper attachments, use them
+    if (attachments && attachments.length > 0) {
+      return { userText: message, parsedAttachments: attachments }
+    }
+
+    // If no attachments but message contains file content, parse it
+    // Look for common file patterns in the message
+    const lines = message.split('\n')
+    let userText = ''
+    const foundFiles: Array<{
+      name: string
+      contentType: string
+      url: string
+      content: string
+    }> = []
+
+    let currentFile: { name?: string; contentType?: string; content: string[] } | null = null
+    let isInFileContent = false
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
+      
+      // Detect CSS file content
+      if (line.includes('@tailwind') || line.includes('@layer') || line.includes(':root {')) {
+        if (!isInFileContent) {
+          // Extract user text before file content
+          const beforeFile = lines.slice(0, i).join('\n').trim()
+          if (beforeFile && !beforeFile.match(/^[@\-\w\s{}.%:;()]+$/)) {
+            userText = beforeFile
+          }
+          
+          isInFileContent = true
+          currentFile = {
+            name: 'globals.css',
+            contentType: 'text/css',
+            content: []
+          }
+        }
+      }
+      
+      if (isInFileContent && currentFile) {
+        currentFile.content.push(line)
+      }
+    }
+
+    if (currentFile) {
+      const fileContent = currentFile.content.join('\n')
+      const dataUrl = `data:${currentFile.contentType};base64,${btoa(fileContent)}`
+      
+      foundFiles.push({
+        name: currentFile.name!,
+        contentType: currentFile.contentType!,
+        url: dataUrl,
+        content: fileContent // Add content property for reconstruction
+      } as any) // Type assertion since we're extending the interface
+    }
+
+    // If no files found, return original message
+    if (foundFiles.length === 0) {
+      return { userText: message, parsedAttachments: [] }
+    }
+
+    return { 
+      userText: userText || 'Uploaded file',
+      parsedAttachments: foundFiles 
+    }
+  }, [message, attachments])
 
   const handleEditClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
-    setEditedContent(message)
+    setEditedContent(userText) // Use only the user text, not the full message with file content
     setIsEditing(true)
   }
 
@@ -75,7 +162,19 @@ export const UserMessage: React.FC<UserMessageProps> = ({
     setIsEditing(false)
 
     try {
-      await onUpdateMessage(messageId, editedContent)
+      // If we have parsed attachments, reconstruct the full message
+      let fullMessage = editedContent
+      
+      if (parsedAttachments && parsedAttachments.length > 0) {
+        // Add file content back to maintain the original message structure
+        parsedAttachments.forEach(attachment => {
+          if ((attachment as any).content) {
+            fullMessage += '\n' + (attachment as any).content
+          }
+        })
+      }
+      
+      await onUpdateMessage(messageId, fullMessage)
     } catch (error) {
       console.error('Failed to save message:', error)
     }
@@ -110,14 +209,33 @@ export const UserMessage: React.FC<UserMessageProps> = ({
           <div className="flex justify-between items-start">
             <div className="flex-1 space-y-2">
               {/* Message text */}
-              <div>{message}</div>
+              <div>{userText}</div>
 
               {/* Attachments display */}
-              {attachments && attachments.length > 0 && (
+              {parsedAttachments && parsedAttachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {attachments.map((attachment, index) => {
-                    const IconComponent = getFileIcon(attachment.contentType)
-                    const isImage = attachment.contentType.startsWith('image/')
+                  {parsedAttachments.map((attachment, index) => {
+                    console.log('🔍 Rendering parsed attachment:', {
+                      attachment,
+                      url: attachment.url,
+                      name: attachment.name,
+                      contentType: attachment.contentType
+                    })
+                    
+                    // Try to get enriched metadata from Supabase URL
+                    const { cleanUrl, metadata } =
+                      SupabaseStorageService.parseEnrichedUrl(attachment.url)
+                    
+                    console.log('🔍 Parsed URL:', { cleanUrl, metadata })
+                    
+                    const displayName = metadata?.name || attachment.name
+                    const displayContentType =
+                      metadata?.contentType || attachment.contentType
+                    
+                    console.log('🔍 Display info:', { displayName, displayContentType })
+
+                    const IconComponent = getFileIcon(displayContentType)
+                    const isImage = displayContentType.startsWith('image/')
 
                     return (
                       <div
@@ -128,8 +246,8 @@ export const UserMessage: React.FC<UserMessageProps> = ({
                           {isImage ? (
                             <div className="relative w-8 h-8 rounded overflow-hidden">
                               <Image
-                                src={attachment.url}
-                                alt={attachment.name}
+                                src={cleanUrl} // Use clean URL without metadata fragment
+                                alt={displayName}
                                 width={32}
                                 height={32}
                                 className="w-full h-full object-cover"
@@ -144,17 +262,17 @@ export const UserMessage: React.FC<UserMessageProps> = ({
 
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium truncate text-foreground">
-                            {attachment.name}
+                            {displayName}
                           </p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <Badge
                               variant="outline"
                               className="text-xs h-4 px-1.5"
                             >
-                              {attachment.contentType.split('/')[0]}
+                              {displayContentType.split('/')[0]}
                             </Badge>
                             <span className="text-xs text-muted-foreground">
-                              {getFileSizeFromDataURL(attachment.url)}
+                              {getFileSizeFromUrl(attachment.url)}
                             </span>
                           </div>
                         </div>

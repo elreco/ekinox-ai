@@ -6,6 +6,7 @@ import { Paperclip } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { cn } from '@/lib/utils'
+import { storageService } from '@/lib/supabase/storage'
 
 import { Button } from './button'
 import { type UploadedFile } from './file-preview'
@@ -121,6 +122,8 @@ export function FileUpload({
           'text/javascript',
           'application/javascript',
           'text/typescript',
+          'application/typescript',
+          'text/x-typescript',
           'text/html',
           'text/css',
           'text/scss',
@@ -145,33 +148,52 @@ export function FileUpload({
 
         const extension = file.name.toLowerCase().split('.').pop() || ''
 
-        // Allow files with empty MIME type if they have a supported extension
-        const hasValidExtension = [
+        // Strict extension-based validation (only types that work well with AI)
+        const supportedExtensions = [
+          // Images
           'jpg',
           'jpeg',
           'png',
           'gif',
           'webp',
+          // Documents
           'pdf',
           'txt',
           'md',
+          // Code files (including TypeScript like Perplexity)
+          'js',
+          'ts',
+          'tsx',
+          'jsx',
           'html',
           'css',
-          'js',
           'json',
           'xml',
           'yaml',
-          'yml'
-        ].includes(extension)
+          'yml',
+          // Spreadsheets
+          'csv'
+        ]
 
+        // For better reliability, use extension as primary validation
+        if (extension && !supportedExtensions.includes(extension)) {
+          validatedFiles.invalid.push({
+            file,
+            reason: `File type .${extension} not supported by AI. Supported: images, documents, code files`
+          })
+          return
+        }
+
+        // Also check MIME type for known problematic cases
         if (
+          file.type &&
           !allowedMimeTypes.includes(file.type) &&
-          file.type !== '' &&
-          !hasValidExtension
+          !file.type.startsWith('text/') &&
+          !file.type.startsWith('application/')
         ) {
           validatedFiles.invalid.push({
             file,
-            reason: `File type ${file.type || extension} not supported by AI. Supported: PNG, JPEG, GIF, WEBP for images.`
+            reason: `MIME type ${file.type} not supported by AI.`
           })
           return
         }
@@ -210,68 +232,6 @@ export function FileUpload({
           validatedFiles.invalid.push({
             file,
             reason: `File type .${extension} not supported for security reasons`
-          })
-          return
-        }
-
-        // Check for AI-compatible file types (match backend validation)
-        const supportedExtensions = [
-          // Images (match exactly what AI backend supports)
-          'jpg',
-          'jpeg',
-          'png',
-          'gif',
-          'webp', // Remove svg and bmp as they're not supported by AI
-          // Documents
-          'pdf',
-          'txt',
-          'md',
-          'doc',
-          'docx',
-          'rtf',
-          // Code files
-          'js',
-          'jsx',
-          'ts',
-          'tsx',
-          'html',
-          'css',
-          'scss',
-          'sass',
-          'less',
-          'py',
-          'java',
-          'c',
-          'cpp',
-          'h',
-          'hpp',
-          'cs',
-          'php',
-          'rb',
-          'go',
-          'rs',
-          'swift',
-          'kt',
-          'json',
-          'xml',
-          'yaml',
-          'yml',
-          'toml',
-          'ini',
-          'cfg',
-          'conf',
-          // Spreadsheets and presentations
-          'xls',
-          'xlsx',
-          'csv',
-          'ppt',
-          'pptx'
-        ]
-
-        if (extension && !supportedExtensions.includes(extension)) {
-          validatedFiles.invalid.push({
-            file,
-            reason: `File type .${extension} not supported by AI. Supported: images, documents, code files`
           })
           return
         }

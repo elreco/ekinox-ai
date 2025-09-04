@@ -100,6 +100,12 @@ export function RenderMessage({
   }, [reasoningAnnotation])
 
   if (message.role === 'user') {
+    console.log('🔍 User message after refresh:', {
+      content: message.content,
+      attachments: (message as any).experimental_attachments,
+      fullMessage: message
+    })
+    
     return (
       <UserMessage
         message={message.content}
