@@ -100,27 +100,31 @@ export function RenderMessage({
   }, [reasoningAnnotation])
 
   if (message.role === 'user') {
-    // Get file metadata from message.data.supabaseFiles if available
-    const fileMetadata = (message as any).data?.supabaseFiles || []
-
-    // If we don't have experimental_attachments but have file metadata, reconstruct them
+    // Get attachments from multiple sources for maximum compatibility
     let attachments = (message as any).experimental_attachments
 
-    if (!attachments && fileMetadata.length > 0) {
-      attachments = fileMetadata.map((file: any) => ({
-        name: file.name,
-        contentType: file.type,
-        url: file.supabaseUrl
-      }))
+    // Fallback 1: get from supabaseFiles (legacy)
+    if (!attachments || attachments.length === 0) {
+      const fileMetadata = (message as any).supabaseFiles || []
+      if (fileMetadata.length > 0) {
+        attachments = fileMetadata.map((file: any) => ({
+          name: file.name,
+          contentType: file.type,
+          url: file.supabaseUrl || file.url
+        }))
+      }
     }
 
-    // Always try to reconstruct if we have fileMetadata (prioritize reconstructed over original)
-    if (fileMetadata.length > 0) {
-      attachments = fileMetadata.map((file: any) => ({
-        name: file.name,
-        contentType: file.type,
-        url: file.supabaseUrl || file.url
-      }))
+    // Fallback 2: reconstruct from fileContents (new structure)
+    if (!attachments || attachments.length === 0) {
+      const fileContents = (message as any).fileContents || []
+      if (fileContents.length > 0) {
+        attachments = fileContents.map((file: any) => ({
+          name: file.name,
+          contentType: file.type,
+          url: file.isImage ? '#image' : '#document' // Placeholder URLs for display
+        }))
+      }
     }
 
     return (

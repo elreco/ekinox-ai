@@ -239,8 +239,17 @@ export function convertToUIMessages(
       content: textContent,
       toolInvocations: toolInvocations.length > 0 ? toolInvocations : undefined,
       annotations: annotations,
-      // Preserve custom data properties when converting back to UI messages
-      ...((message as any).data && { data: (message as any).data })
+      // Preserve custom properties when converting back to UI messages
+      ...((message as any).data && { data: (message as any).data }),
+      ...((message as any).fileContents && {
+        fileContents: (message as any).fileContents
+      }),
+      ...((message as any).experimental_attachments && {
+        experimental_attachments: (message as any).experimental_attachments
+      }),
+      ...((message as any).supabaseFiles && {
+        supabaseFiles: (message as any).supabaseFiles
+      })
     }
 
     chatMessages.push(newMessage)
@@ -294,15 +303,39 @@ export function convertToExtendedCoreMessages(
       })
     }
 
-    // Convert current message while preserving custom data
+    // Convert current message while preserving custom properties
     const converted = convertToCoreMessages([message])
 
-    // Preserve custom data properties when converting user messages
-    if (message.role === 'user' && (message as any).data) {
+    // Preserve custom properties when converting user messages
+    if (message.role === 'user') {
+      const customProps: any = {}
+
+      // Preserve file contents (new structure)
+      if ((message as any).fileContents) {
+        customProps.fileContents = (message as any).fileContents
+      }
+
+      // Preserve experimental attachments for UI
+      if ((message as any).experimental_attachments) {
+        customProps.experimental_attachments = (
+          message as any
+        ).experimental_attachments
+      }
+
+      // Preserve supabase files for backward compatibility
+      if ((message as any).supabaseFiles) {
+        customProps.supabaseFiles = (message as any).supabaseFiles
+      }
+
+      // Preserve legacy data if it exists
+      if ((message as any).data) {
+        customProps.data = (message as any).data
+      }
+
       result.push(
         ...converted.map(coreMsg => ({
           ...coreMsg,
-          data: (message as any).data
+          ...customProps
         }))
       )
     } else {

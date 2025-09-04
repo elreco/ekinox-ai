@@ -56,6 +56,13 @@ export function VoiceInput({
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognition | null>(null)
+  const isListeningRef = useRef(false)
+  const canStartRef = useRef(true)
+
+  // Sync ref with state
+  useEffect(() => {
+    isListeningRef.current = isListening
+  }, [isListening])
 
   useEffect(() => {
     // Check if speech recognition is supported
@@ -74,20 +81,37 @@ export function VoiceInput({
 
       recognition.onstart = () => {
         console.log('🎤 Speech recognition started')
+        isListeningRef.current = true
         setIsListening(true)
       }
 
       recognition.onend = () => {
         console.log('🎤 Speech recognition ended')
+        isListeningRef.current = false
         setIsListening(false)
+        // Allow immediate restart when recognition ends naturally
+        setTimeout(() => {
+          canStartRef.current = true
+        }, 100)
       }
 
       recognition.onabort = () => {
         console.log('🎤 Speech recognition aborted')
+        isListeningRef.current = false
         setIsListening(false)
+        // Allow restart after abort
+        setTimeout(() => {
+          canStartRef.current = true
+        }, 500)
       }
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
+        // Don't process results if we're not supposed to be listening
+        if (!isListeningRef.current) {
+          console.log('🎤 Ignoring speech result - not listening')
+          return
+        }
+
         const speechEvent = event
         let finalTranscript = ''
         let interimTranscript = ''
@@ -105,13 +129,14 @@ export function VoiceInput({
           }
         }
 
-        if (finalTranscript) {
+        if (finalTranscript && isListeningRef.current) {
           onTranscript(finalTranscript)
         }
       }
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error)
+        isListeningRef.current = false
         setIsListening(false)
 
         if (event.error === 'not-allowed') {
@@ -122,55 +147,110 @@ export function VoiceInput({
           toast.error('Network error', {
             description: 'Speech recognition requires an internet connection.'
           })
+        } else if (event.error === 'aborted') {
+          // Don't show error for manual abort
+          console.log('🎤 Recognition manually aborted')
         } else {
           toast.error('Speech recognition failed', {
-            description: 'Please try again.'
+            description: 'Please wait a moment and try again.'
           })
         }
+
+        // Allow restart after error with a delay
+        setTimeout(() => {
+          canStartRef.current = true
+        }, 1000)
       }
     } else {
       setIsSupported(false)
     }
 
     return () => {
-      if (recognitionRef.current && isListening) {
-        recognitionRef.current.stop()
+      if (recognitionRef.current && isListeningRef.current) {
+        try {
+          recognitionRef.current.stop()
+          isListeningRef.current = false
+        } catch (error) {
+          console.error('Error stopping recognition in cleanup:', error)
+        }
       }
     }
   }, [onTranscript, isListening])
 
   const startListening = useCallback(() => {
-    if (!recognitionRef.current || isListening) return
+    if (
+      !recognitionRef.current ||
+      isListeningRef.current ||
+      !canStartRef.current
+    ) {
+      if (!canStartRef.current) {
+        toast.error('Please wait a moment before starting again')
+      }
+      return
+    }
 
     console.log('🎤 Starting speech recognition...')
 
     try {
+      // Reset continuous mode for new session
+      recognitionRef.current.continuous = true
+
+      // Update refs first to prevent double calls
+      isListeningRef.current = true
+      canStartRef.current = false
+      setIsListening(true)
+
       recognitionRef.current.start()
       toast.success('Listening...', {
         description: 'Speak clearly into your microphone.'
       })
     } catch (error) {
       console.error('Failed to start speech recognition:', error)
-      toast.error('Failed to start listening')
-      setIsListening(false) // Reset state on error
+      toast.error('Please wait a moment and try again')
+      isListeningRef.current = false
+      setIsListening(false)
+
+      // Reset canStart after a delay
+      setTimeout(() => {
+        canStartRef.current = true
+      }, 1000)
     }
-  }, [isListening])
+  }, [])
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return
 
-    console.log('🎤 Stopping speech recognition...', { isListening })
+    console.log('🎤 Stopping speech recognition...')
+
+    // Immediately update state to stop processing new results
+    isListeningRef.current = false
+    setIsListening(false)
 
     try {
-      // Force stop the recognition
-      recognitionRef.current.abort() // Use abort instead of stop for immediate stopping
-      setIsListening(false) // Immediately update state
+      // Disable continuous mode to prevent automatic restart
+      recognitionRef.current.continuous = false
+
+      // Stop the recognition
+      recognitionRef.current.stop()
+
       toast.success('Stopped listening')
     } catch (error) {
       console.error('Failed to stop speech recognition:', error)
-      setIsListening(false) // Ensure state is reset even on error
+      // Force abort as last resort
+      try {
+        if (recognitionRef.current) {
+          recognitionRef.current.abort()
+        }
+      } catch (abortError) {
+        console.error('Failed to abort:', abortError)
+      }
     }
-  }, [isListening])
+
+    // Allow restart after a short delay
+    setTimeout(() => {
+      canStartRef.current = true
+    }, 300)
+  }, [])
 
   const handleClick = useCallback(() => {
     if (isListening) {
