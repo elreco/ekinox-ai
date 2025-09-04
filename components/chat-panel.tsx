@@ -229,63 +229,64 @@ export function ChatPanel({
         // Clear attached files and input
         setAttachedFiles([])
 
-        // Send message with file content for AI, but clean UI display
-        append({
-          role: 'user',
+        // Send message with file content using a cleaner approach
+        const messageWithFiles = {
+          role: 'user' as const,
           content: input, // Keep the original input for UI display
-          // Store file contents in data for server processing
-          data: {
-            fileContents: attachments.map(attachment => {
-              if (attachment.contentType?.startsWith('image/')) {
+          // Add file contents directly to the message object (not in deprecated data)
+          fileContents: attachments.map(attachment => {
+            if (attachment.contentType?.startsWith('image/')) {
+              return {
+                name: attachment.name,
+                type: attachment.contentType,
+                content: `[Image: ${attachment.name}]`,
+                isImage: true
+              }
+            } else if (attachment.url.startsWith('data:')) {
+              try {
+                const [header, data] = attachment.url.split(',')
+                const content = Buffer.from(data, 'base64').toString('utf-8')
                 return {
                   name: attachment.name,
                   type: attachment.contentType,
-                  content: `[Image: ${attachment.name}]`,
-                  isImage: true
+                  content: content,
+                  isImage: false
                 }
-              } else if (attachment.url.startsWith('data:')) {
-                try {
-                  const [header, data] = attachment.url.split(',')
-                  const content = Buffer.from(data, 'base64').toString('utf-8')
-                  return {
-                    name: attachment.name,
-                    type: attachment.contentType,
-                    content: content,
-                    isImage: false
-                  }
-                } catch (error) {
-                  console.error('Error decoding file content:', error)
-                  return {
-                    name: attachment.name,
-                    type: attachment.contentType,
-                    content: '[Error reading file content]',
-                    isImage: false
-                  }
-                }
-              } else {
+              } catch (error) {
+                console.error('Error decoding file content:', error)
                 return {
                   name: attachment.name,
                   type: attachment.contentType,
-                  content: '[File content not available]',
+                  content: '[Error reading file content]',
                   isImage: false
                 }
               }
-            }),
-            supabaseFiles: attachedFiles.map(f => ({
-              id: f.id,
-              name: f.file.name,
-              type: f.file.type,
-              size: f.file.size,
-              supabaseUrl: attachments.find(a => a.name === f.file.name)?.url
-            }))
-          },
+            } else {
+              return {
+                name: attachment.name,
+                type: attachment.contentType,
+                content: '[File content not available]',
+                isImage: false
+              }
+            }
+          }),
           // Keep experimental_attachments for UI display
           experimental_attachments: attachments.map(attachment => ({
             name: attachment.name,
             contentType: attachment.contentType,
             url: attachment.url
+          })),
+          // Store metadata for backward compatibility
+          supabaseFiles: attachedFiles.map(f => ({
+            id: f.id,
+            name: f.file.name,
+            type: f.file.type,
+            size: f.file.size,
+            supabaseUrl: attachments.find(a => a.name === f.file.name)?.url
           }))
-        } as any)
+        }
+
+        append(messageWithFiles)
 
         // Clear input
         const clearEvent = {

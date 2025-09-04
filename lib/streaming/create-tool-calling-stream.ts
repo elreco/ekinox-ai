@@ -12,7 +12,11 @@ import { getMaxAllowedTokens, truncateMessages } from '../utils/context-window'
 import { isReasoningModel } from '../utils/registry'
 
 import { handleStreamFinish } from './handle-stream-finish'
-import { BaseStreamConfig } from './types'
+import {
+  BaseStreamConfig,
+  buildContentWithFiles,
+  hasFileContents
+} from './types'
 
 // Function to check if a message contains ask_question tool invocation
 function containsAskQuestionTool(message: CoreMessage) {
@@ -34,28 +38,13 @@ export function createToolCallingStreamResponse(config: BaseStreamConfig) {
       const modelId = `${model.providerId}:${model.id}`
 
       try {
-        // Enhanced file handling - process files from data.fileContents
+        // Enhanced file handling - process files using type-safe utilities
         const coreMessages = messages.map(msg => {
-          // Check if message has file contents in data
-          if (
-            msg.role === 'user' &&
-            (msg.data as any)?.fileContents &&
-            Array.isArray((msg.data as any).fileContents)
-          ) {
-            // Build content with file contents
-            let fullContent = msg.content as string
-
-            ;(msg.data as any).fileContents.forEach((file: any) => {
-              if (file.isImage) {
-                fullContent += `\n\n[Image: ${file.name}]`
-              } else {
-                fullContent += `\n\n--- File: ${file.name} (${file.type}) ---\n${file.content}\n--- End of ${file.name} ---`
-              }
-            })
-
+          // Check if message has file contents using type guard
+          if (hasFileContents(msg)) {
             return {
               role: 'user' as const,
-              content: fullContent
+              content: buildContentWithFiles(msg)
             }
           }
 

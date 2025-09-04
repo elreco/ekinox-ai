@@ -12,7 +12,11 @@ import { getMaxAllowedTokens, truncateMessages } from '../utils/context-window'
 
 import { handleStreamFinish } from './handle-stream-finish'
 import { executeToolCall } from './tool-execution'
-import { BaseStreamConfig } from './types'
+import {
+  BaseStreamConfig,
+  buildContentWithFiles,
+  hasFileContents
+} from './types'
 
 export function createManualToolStreamResponse(config: BaseStreamConfig) {
   return createDataStreamResponse({
@@ -24,28 +28,13 @@ export function createManualToolStreamResponse(config: BaseStreamConfig) {
         : modelId
 
       try {
-        // Enhanced file handling - process files from data.fileContents
+        // Enhanced file handling - process files using type-safe utilities
         const coreMessages = messages.map(msg => {
-          // Check if message has file contents in data
-          if (
-            msg.role === 'user' &&
-            (msg.data as any)?.fileContents &&
-            Array.isArray((msg.data as any).fileContents)
-          ) {
-            // Build content with file contents
-            let fullContent = msg.content as string
-
-            ;(msg.data as any).fileContents.forEach((file: any) => {
-              if (file.isImage) {
-                fullContent += `\n\n[Image: ${file.name}]`
-              } else {
-                fullContent += `\n\n--- File: ${file.name} (${file.type}) ---\n${file.content}\n--- End of ${file.name} ---`
-              }
-            })
-
+          // Check if message has file contents using type guard
+          if (hasFileContents(msg)) {
             return {
               role: 'user' as const,
-              content: fullContent
+              content: buildContentWithFiles(msg)
             }
           }
 
