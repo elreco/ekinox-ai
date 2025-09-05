@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState, useTransition } from 'react'
 
-import { MoreHorizontal, Trash2 } from 'lucide-react'
+import { FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Chat } from '@/lib/types'
@@ -24,6 +24,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
@@ -32,6 +33,7 @@ import {
   SidebarMenuItem
 } from '@/components/ui/sidebar'
 
+import { FolderSelector } from '@/components/folders/folder-selector'
 import { Spinner } from '../ui/spinner'
 
 interface ChatMenuItemProps {
@@ -83,6 +85,7 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
   const [isPending, startTransition] = useTransition()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [showFolderSelector, setShowFolderSelector] = useState(false)
 
   const onDelete = () => {
     startTransition(async () => {
@@ -112,14 +115,55 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
     })
   }
 
+  const onMoveToFolder = (folderId: string | null) => {
+    // Close modal immediately
+    setIsMenuOpen(false)
+    setShowFolderSelector(false)
+
+    // Start transition which will show the spinner via isPending
+    startTransition(async () => {
+      // Immediate optimistic update
+      window.dispatchEvent(new CustomEvent('chat-history-updated'))
+
+      try {
+        const res = await fetch(`/api/chat/${chat.id}/move`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ folderId })
+        })
+
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Failed to move chat')
+        }
+
+        // Final sync with server state
+        window.dispatchEvent(new CustomEvent('chat-history-updated'))
+        toast.success('Chat moved successfully')
+      } catch (error) {
+        console.error('Failed to move chat:', error)
+        toast.error((error as Error).message || 'Failed to move chat')
+        // Revert optimistic update on error
+        window.dispatchEvent(new CustomEvent('chat-history-updated'))
+      }
+    })
+  }
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem onDragStart={handleDragStart}>
       <SidebarMenuButton
         asChild
         isActive={isActive}
         className="h-auto flex-col gap-0.5 items-start p-2 pr-8"
       >
-        <Link href={chat.path}>
+        <Link href={chat.path} draggable={false}>
           <div className="text-xs font-medium truncate select-none w-full">
             {chat.title}
           </div>
@@ -143,6 +187,18 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
           </SidebarMenuAction>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" align="start">
+          <DropdownMenuItem
+            disabled={isPending}
+            className="gap-2"
+            onSelect={e => {
+              e.preventDefault()
+              setShowFolderSelector(true)
+            }}
+          >
+            <FolderOpen size={14} />
+            Move to Folder
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <AlertDialogTrigger asChild>
               <DropdownMenuItem
@@ -187,6 +243,29 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
           </AlertDialog>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <AlertDialog
+        open={showFolderSelector}
+        onOpenChange={setShowFolderSelector}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Move Chat to Folder</AlertDialogTitle>
+            <AlertDialogDescription>
+              Select a folder to move "{chat.title}" to.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <FolderSelector
+              value={chat.folderId}
+              onValueChange={onMoveToFolder}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarMenuItem>
   )
 }

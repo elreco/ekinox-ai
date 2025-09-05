@@ -1,4 +1,4 @@
-import { ChatHistoryClient } from './chat-history-client'
+import { FolderChatHistory } from './folder-chat-history'
 
 export async function ChatHistorySection() {
   const enableSaveChatHistory = process.env.ENABLE_SAVE_CHAT_HISTORY === 'true'
@@ -6,5 +6,5 @@ export async function ChatHistorySection() {
     return null
   }
 
-  return <ChatHistoryClient />
+  return <FolderChatHistory />
 }

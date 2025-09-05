@@ -18,11 +18,17 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const offset = parseInt(searchParams.get('offset') || '0', 10)
   const limit = parseInt(searchParams.get('limit') || '20', 10)
+  const folderId = searchParams.get('folderId') || undefined
 
   const userId = await getCurrentUserId()
 
   try {
-    const result = await getChatsPage(userId, limit, offset)
+    const result = await getChatsPage(
+      userId,
+      limit,
+      offset,
+      folderId === 'null' ? null : folderId
+    )
     return NextResponse.json<ChatPageResponse>(result)
   } catch (error) {
     console.error('API route error fetching chats:', error)

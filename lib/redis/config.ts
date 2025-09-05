@@ -102,6 +102,14 @@ export class RedisWrapper {
     }
   }
 
+  async hset(key: string, field: string, value: string): Promise<number> {
+    if (this.client instanceof Redis) {
+      return this.client.hset(key, { [field]: value })
+    } else {
+      return (this.client as RedisClientType).hSet(key, field, value)
+    }
+  }
+
   async close(): Promise<void> {
     if (this.client instanceof Redis) {
       // Upstash Redis doesn't require explicit closing

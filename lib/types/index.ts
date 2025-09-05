@@ -1,4 +1,4 @@
-import { CoreMessage, JSONValue, Message } from 'ai'
+import { CoreMessage, JSONValue } from 'ai'
 
 export type SearchResults = {
   images: SearchResultImage[]
@@ -57,6 +57,16 @@ export type SerperSearchResultItem = {
   position: number
 }
 
+export interface Folder extends Record<string, any> {
+  id: string
+  name: string
+  createdAt: Date
+  updatedAt: Date
+  userId: string
+  color?: string
+  description?: string
+}
+
 export interface Chat extends Record<string, any> {
   id: string
   title: string
@@ -65,6 +75,7 @@ export interface Chat extends Record<string, any> {
   path: string
   messages: ExtendedCoreMessage[] // Note: Changed from AIMessage to ExtendedCoreMessage
   sharePath?: string
+  folderId?: string
 }
 
 // ExtendedCoreMessage for saveing annotations

@@ -67,7 +67,8 @@ export async function getChats(userId?: string | null) {
 export async function getChatsPage(
   userId: string,
   limit = 20,
-  offset = 0
+  offset = 0,
+  folderId?: string | null
 ): Promise<{ chats: Chat[]; nextOffset: number | null }> {
   try {
     const redis = await getRedis()
@@ -90,7 +91,7 @@ export async function getChatsPage(
       })
     )
 
-    const chats = results
+    let chats = results
       .filter((result): result is Record<string, any> => {
         if (result === null || Object.keys(result).length === 0) {
           return false
@@ -111,6 +112,15 @@ export async function getChatsPage(
         }
         return plainChat as Chat
       })
+
+    if (folderId !== undefined) {
+      chats = chats.filter(chat => {
+        if (folderId === null) {
+          return !chat.folderId || chat.folderId === ''
+        }
+        return chat.folderId === folderId
+      })
+    }
 
     const nextOffset = chatKeys.length === limit ? offset + limit : null
     return { chats, nextOffset }
@@ -215,10 +225,16 @@ export async function saveChat(chat: Chat, userId: string = 'anonymous') {
 
     const chatToSave = {
       ...chat,
-      messages: JSON.stringify(chat.messages)
+      messages: JSON.stringify(chat.messages),
+      folderId: chat.folderId || ''
     }
 
-    pipeline.hmset(`chat:${chat.id}`, chatToSave)
+    // Filter out null/undefined values for Redis
+    const cleanChatData = Object.fromEntries(
+      Object.entries(chatToSave).filter(([_, value]) => value != null)
+    )
+
+    pipeline.hmset(`chat:${chat.id}`, cleanChatData)
     pipeline.zadd(getUserChatKey(userId), Date.now(), `chat:${chat.id}`)
 
     const results = await pipeline.exec()
@@ -256,4 +272,29 @@ export async function shareChat(id: string, userId: string = 'anonymous') {
   await redis.hmset(`chat:${id}`, payload)
 
   return payload
+}
+
+export async function moveChatToFolder(
+  chatId: string,
+  folderId: string | null,
+  userId: string
+): Promise<{ error?: string }> {
+  try {
+    const redis = await getRedis()
+    const chat = await getChat(chatId, userId)
+
+    if (!chat) {
+      return { error: 'Chat not found' }
+    }
+
+    if (chat.userId !== userId) {
+      return { error: 'Unauthorized' }
+    }
+
+    await redis.hset(`chat:${chatId}`, 'folderId', folderId || '')
+    return {}
+  } catch (error) {
+    console.error('Error moving chat to folder:', error)
+    return { error: 'Failed to move chat' }
+  }
 }
