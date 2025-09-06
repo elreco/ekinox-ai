@@ -5,16 +5,17 @@ import { useCallback, useEffect, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
 import { CreateFolderModal } from '@/components/folders/create-folder-modal'
+import { FolderMenu } from '@/components/folders/folder-menu'
 import { Button } from '@/components/ui/button'
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger
 } from '@/components/ui/collapsible'
 import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarMenu
 } from '@/components/ui/sidebar'
 import { type Chat, type Folder } from '@/lib/types'
 import { ChatHistorySkeleton } from './chat-history-skeleton'
@@ -46,49 +47,25 @@ export function FolderChatHistory() {
     }
 
     try {
-      // Fetch all data in parallel for better performance
-      const [foldersResponse, uncategorizedResponse] = await Promise.all([
-        fetch('/api/folders'),
-        fetch('/api/chats?folderId=null&limit=50')
-      ])
+      // Single optimized API call
+      const response = await fetch('/api/chats/organized')
 
-      if (!foldersResponse.ok || !uncategorizedResponse.ok) {
-        throw new Error('Failed to fetch folders or chats')
+      if (!response.ok) {
+        throw new Error('Failed to fetch organized chats')
       }
 
-      const [foldersData, uncategorizedData] = await Promise.all([
-        foldersResponse.json() as Promise<Folder[]>,
-        uncategorizedResponse.json() as Promise<ChatPageResponse>
-      ])
+      const data = await response.json()
 
-      // Fetch chats for all folders in parallel
-      const folderChatPromises = foldersData.map(async folder => {
-        try {
-          const chatsResponse = await fetch(
-            `/api/chats?folderId=${folder.id}&limit=50`
-          )
-          const chatsData: ChatPageResponse = chatsResponse.ok
-            ? await chatsResponse.json()
-            : { chats: [], nextOffset: null }
+      // Transform folders to include expanded state
+      const foldersWithChats = data.folders.map((folder: any) => ({
+        ...folder,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: 'current'
+      }))
 
-          return {
-            ...folder,
-            chats: chatsData.chats
-          }
-        } catch (error) {
-          console.error(`Error fetching chats for folder ${folder.id}:`, error)
-          return {
-            ...folder,
-            chats: []
-          }
-        }
-      })
-
-      const foldersWithChats = await Promise.all(folderChatPromises)
-
-      // Update state immediately
       setFolders(foldersWithChats)
-      setUncategorizedChats(uncategorizedData.chats)
+      setUncategorizedChats(data.uncategorizedChats)
     } catch (error) {
       console.error('Failed to load folders and chats:', error)
       if (isInitial) {
@@ -235,24 +212,34 @@ export function FolderChatHistory() {
                 open={expandedFolders.has(folder.id)}
                 onOpenChange={() => toggleFolder(folder.id)}
               >
-                <CollapsibleTrigger
-                  className="flex items-center gap-2 w-full p-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  draggable={false}
-                >
-                  {expandedFolders.has(folder.id) ? (
-                    <ChevronDown size={16} />
-                  ) : (
-                    <ChevronRight size={16} />
-                  )}
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: folder.color || '#6B7280' }}
+                <div className="group relative">
+                  <CollapsibleTrigger
+                    className="flex items-center gap-2 w-full p-2 pr-8 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    draggable={false}
+                  >
+                    {expandedFolders.has(folder.id) ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: folder.color || '#6B7280' }}
+                      />
+                      <span>{folder.name}</span>
+                      <span className="text-xs">({folder.chats.length})</span>
+                    </div>
+                  </CollapsibleTrigger>
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                    <FolderMenu
+                      folderId={folder.id}
+                      folderName={folder.name}
+                      chatCount={folder.chats.length}
+                      onFolderUpdated={onFolderCreated}
                     />
-                    <span>{folder.name}</span>
-                    <span className="text-xs">({folder.chats.length})</span>
                   </div>
-                </CollapsibleTrigger>
+                </div>
                 <CollapsibleContent>
                   {folder.chats.length > 0 ? (
                     <SidebarMenu>

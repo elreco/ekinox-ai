@@ -10,27 +10,27 @@ import { toast } from 'sonner'
 import { Chat } from '@/lib/types'
 
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem
+    SidebarMenuAction,
+    SidebarMenuButton,
+    SidebarMenuItem
 } from '@/components/ui/sidebar'
 
 import { FolderSelector } from '@/components/folders/folder-selector'
@@ -122,9 +122,6 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
 
     // Start transition which will show the spinner via isPending
     startTransition(async () => {
-      // Immediate optimistic update
-      window.dispatchEvent(new CustomEvent('chat-history-updated'))
-
       try {
         const res = await fetch(`/api/chat/${chat.id}/move`, {
           method: 'PATCH',
@@ -139,14 +136,13 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
           throw new Error(errorData.error || 'Failed to move chat')
         }
 
-        // Final sync with server state
+        // Only update once after successful API call
         window.dispatchEvent(new CustomEvent('chat-history-updated'))
         toast.success('Chat moved successfully')
+
       } catch (error) {
         console.error('Failed to move chat:', error)
         toast.error((error as Error).message || 'Failed to move chat')
-        // Revert optimistic update on error
-        window.dispatchEvent(new CustomEvent('chat-history-updated'))
       }
     })
   }
