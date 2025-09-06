@@ -1,23 +1,27 @@
 'use client'
 
-import { ChevronDown, ChevronRight, Plus, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState, useTransition } from 'react'
+
+import { ChevronDown, ChevronRight, Plus, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+
+import { type Chat, type Folder } from '@/lib/types'
+
+import { Button } from '@/components/ui/button'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from '@/components/ui/collapsible'
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu
+} from '@/components/ui/sidebar'
 
 import { CreateFolderModal } from '@/components/folders/create-folder-modal'
 import { FolderMenu } from '@/components/folders/folder-menu'
-import { Button } from '@/components/ui/button'
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger
-} from '@/components/ui/collapsible'
-import {
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarMenu
-} from '@/components/ui/sidebar'
-import { type Chat, type Folder } from '@/lib/types'
+
 import { ChatHistorySkeleton } from './chat-history-skeleton'
 import { ChatMenuItem } from './chat-menu-item'
 import { ClearHistoryAction } from './clear-history-action'

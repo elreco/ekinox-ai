@@ -1,27 +1,28 @@
 'use client'
 
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
+
+import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -32,7 +33,12 @@ interface FolderMenuProps {
   onFolderUpdated?: () => void
 }
 
-export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }: FolderMenuProps) {
+export function FolderMenu({
+  folderId,
+  folderName,
+  chatCount,
+  onFolderUpdated
+}: FolderMenuProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showMoveChatsDialog, setShowMoveChatsDialog] = useState(false)
@@ -70,7 +76,9 @@ export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }:
     startTransition(async () => {
       try {
         // First, get all chats in this folder
-        const chatsResponse = await fetch(`/api/chats?folderId=${folderId}&limit=200`)
+        const chatsResponse = await fetch(
+          `/api/chats?folderId=${folderId}&limit=200`
+        )
         if (!chatsResponse.ok) {
           throw new Error('Failed to fetch chats')
         }
@@ -98,7 +106,9 @@ export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }:
           throw new Error(errorData.error || 'Failed to delete folder')
         }
 
-        toast.success(`Folder "${folderName}" deleted and ${chatCount} chat${chatCount > 1 ? 's' : ''} moved to Uncategorized`)
+        toast.success(
+          `Folder "${folderName}" deleted and ${chatCount} chat${chatCount > 1 ? 's' : ''} moved to Uncategorized`
+        )
         setIsMenuOpen(false)
         setShowMoveChatsDialog(false)
 
@@ -124,13 +134,9 @@ export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }:
           size="sm"
           className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
           disabled={isPending}
-          onClick={(e) => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
         >
-          {isPending ? (
-            <Spinner size={12} />
-          ) : (
-            <MoreHorizontal size={12} />
-          )}
+          {isPending ? <Spinner /> : <MoreHorizontal size={12} />}
           <span className="sr-only">Folder actions</span>
         </Button>
       </DropdownMenuTrigger>
@@ -140,37 +146,47 @@ export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }:
           Edit Folder
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-                 <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-           <AlertDialogTrigger asChild>
-             <DropdownMenuItem
-               disabled={isPending}
-               className="gap-2 text-destructive focus:text-destructive"
-               onSelect={(e) => {
-                 e.preventDefault()
-                 if (canDelete) {
-                   setShowDeleteDialog(true)
-                 } else {
-                   setShowMoveChatsDialog(true)
-                 }
-               }}
-             >
-               <Trash2 size={14} />
-               Delete Folder
-               {!canDelete && <span className="text-xs ml-1 text-muted-foreground">({chatCount} chat{chatCount > 1 ? 's' : ''})</span>}
-             </DropdownMenuItem>
-           </AlertDialogTrigger>
-           <AlertDialogContent>
-             <AlertDialogHeader>
-               <AlertDialogTitle>Delete Folder</AlertDialogTitle>
-               <AlertDialogDescription className="space-y-2">
-                 <p>Are you sure you want to delete the folder "{folderName}"?</p>
-                 <p className="text-sm text-muted-foreground">
-                   <strong>Note:</strong> This will only delete the folder itself.
-                   No chats will be deleted - they are safely stored and can be accessed from other folders or the uncategorized section.
-                 </p>
-                 <p className="text-sm font-medium">This action cannot be undone.</p>
-               </AlertDialogDescription>
-             </AlertDialogHeader>
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem
+              disabled={isPending}
+              className="gap-2 text-destructive focus:text-destructive"
+              onSelect={e => {
+                e.preventDefault()
+                if (canDelete) {
+                  setShowDeleteDialog(true)
+                } else {
+                  setShowMoveChatsDialog(true)
+                }
+              }}
+            >
+              <Trash2 size={14} />
+              Delete Folder
+              {!canDelete && (
+                <span className="text-xs ml-1 text-muted-foreground">
+                  ({chatCount} chat{chatCount > 1 ? 's' : ''})
+                </span>
+              )}
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Folder</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>
+                  Are you sure you want to delete the folder &quot;{folderName}&quot;?
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> This will only delete the folder
+                  itself. No chats will be deleted - they are safely stored and
+                  can be accessed from other folders or the uncategorized
+                  section.
+                </p>
+                <p className="text-sm font-medium">
+                  This action cannot be undone.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
               <AlertDialogAction
@@ -188,47 +204,58 @@ export function FolderMenu({ folderId, folderName, chatCount, onFolderUpdated }:
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>
-                     </AlertDialogContent>
-         </AlertDialog>
+          </AlertDialogContent>
+        </AlertDialog>
 
-         {/* Dialog for folders with chats */}
-         <AlertDialog open={showMoveChatsDialog} onOpenChange={setShowMoveChatsDialog}>
-           <AlertDialogContent>
-             <AlertDialogHeader>
-               <AlertDialogTitle>Delete Folder with Chats</AlertDialogTitle>
-               <AlertDialogDescription className="space-y-3">
-                 <p>The folder "{folderName}" contains {chatCount} chat{chatCount > 1 ? 's' : ''}.</p>
-                 <p className="text-sm text-muted-foreground">
-                   <strong>What happens:</strong>
-                 </p>
-                 <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-2">
-                   <li>All {chatCount} chat{chatCount > 1 ? 's' : ''} will be moved to "Uncategorized"</li>
-                   <li>The folder "{folderName}" will be permanently deleted</li>
-                   <li>Your chats will remain safe and accessible</li>
-                 </ul>
-                 <p className="text-sm font-medium text-destructive">This action cannot be undone.</p>
-               </AlertDialogDescription>
-             </AlertDialogHeader>
-             <AlertDialogFooter>
-               <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
-               <AlertDialogAction
-                 disabled={isPending}
-                 onClick={handleMoveChatsAndDelete}
-                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-               >
-                 {isPending ? (
-                   <div className="flex items-center gap-2">
-                     <Spinner />
-                     Moving & Deleting...
-                   </div>
-                 ) : (
-                   `Move ${chatCount} Chat${chatCount > 1 ? 's' : ''} & Delete Folder`
-                 )}
-               </AlertDialogAction>
-             </AlertDialogFooter>
-           </AlertDialogContent>
-         </AlertDialog>
-       </DropdownMenuContent>
-     </DropdownMenu>
-   )
- }
+        {/* Dialog for folders with chats */}
+        <AlertDialog
+          open={showMoveChatsDialog}
+          onOpenChange={setShowMoveChatsDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Folder with Chats</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-3">
+                <p>
+                  The folder &quot;{folderName}&quot; contains {chatCount} chat
+                  {chatCount > 1 ? 's' : ''}.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  <strong>What happens:</strong>
+                </p>
+                <ul className="text-sm text-muted-foreground list-disc list-inside space-y-1 ml-2">
+                  <li>
+                    All {chatCount} chat{chatCount > 1 ? 's' : ''} will be moved
+                    to &quot;Uncategorized&quot;
+                  </li>
+                  <li>The folder &quot;{folderName}&quot; will be permanently deleted</li>
+                  <li>Your chats will remain safe and accessible</li>
+                </ul>
+                <p className="text-sm font-medium text-destructive">
+                  This action cannot be undone.
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={isPending}
+                onClick={handleMoveChatsAndDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner />
+                    Moving & Deleting...
+                  </div>
+                ) : (
+                  `Move ${chatCount} Chat${chatCount > 1 ? 's' : ''} & Delete Folder`
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}

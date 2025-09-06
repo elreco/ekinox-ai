@@ -39,41 +39,22 @@ export function createToolCallingStreamResponse(config: BaseStreamConfig) {
 
       try {
         // Enhanced file handling - process files using type-safe utilities
-        const coreMessages = messages.map(msg => {
+        const processedMessages = messages.map(msg => {
           // Check if message has file contents using type guard
           if (hasFileContents(msg)) {
             return {
-              role: 'user' as const,
+              ...msg,
               content: buildContentWithFiles(msg)
             }
           }
 
-          // Fallback: check for experimental_attachments (legacy)
-          if (msg.role === 'user' && msg.experimental_attachments) {
-            return {
-              role: 'user' as const,
-              content: [
-                { type: 'text' as const, text: msg.content },
-                ...msg.experimental_attachments.map(attachment => {
-                  if (attachment.contentType?.startsWith('image/')) {
-                    return {
-                      type: 'image' as const,
-                      image: attachment.url
-                    }
-                  } else {
-                    return {
-                      type: 'text' as const,
-                      text: `File: ${attachment.name} - Content not processed`
-                    }
-                  }
-                })
-              ]
-            }
-          }
+          // Fallback: check for experimental_attachments (legacy) - let convertToCoreMessages handle this
+          // No need to pre-process, convertToCoreMessages will handle experimental_attachments
 
-          // For other messages, use standard conversion
-          return convertToCoreMessages([msg])[0]
+          return msg
         })
+
+        const coreMessages = convertToCoreMessages(processedMessages)
 
         const truncatedMessages = truncateMessages(
           coreMessages,

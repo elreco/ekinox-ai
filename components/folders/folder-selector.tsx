@@ -1,7 +1,10 @@
 'use client'
 
-import { Check, Folder } from 'lucide-react'
 import { useEffect, useState } from 'react'
+
+import { Check, Folder } from 'lucide-react'
+
+import { type Folder as FolderType } from '@/lib/types'
 
 import {
   Select,
@@ -10,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { type Folder as FolderType } from '@/lib/types'
 
 interface FolderSelectorProps {
   value?: string | null

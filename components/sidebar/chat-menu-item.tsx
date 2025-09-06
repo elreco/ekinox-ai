@@ -1,8 +1,8 @@
 'use client'
 
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useTransition } from 'react'
 
 import { FolderOpen, MoreHorizontal, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,30 +10,31 @@ import { toast } from 'sonner'
 import { Chat } from '@/lib/types'
 
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
-    SidebarMenuAction,
-    SidebarMenuButton,
-    SidebarMenuItem
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem
 } from '@/components/ui/sidebar'
 
 import { FolderSelector } from '@/components/folders/folder-selector'
+
 import { Spinner } from '../ui/spinner'
 
 interface ChatMenuItemProps {
@@ -139,7 +140,6 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
         // Only update once after successful API call
         window.dispatchEvent(new CustomEvent('chat-history-updated'))
         toast.success('Chat moved successfully')
-
       } catch (error) {
         console.error('Failed to move chat:', error)
         toast.error((error as Error).message || 'Failed to move chat')
@@ -248,7 +248,7 @@ export function ChatMenuItem({ chat }: ChatMenuItemProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Move Chat to Folder</AlertDialogTitle>
             <AlertDialogDescription>
-              Select a folder to move "{chat.title}" to.
+              Select a folder to move &quot;{chat.title}&quot; to.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="py-4">

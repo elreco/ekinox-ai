@@ -3,13 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { moveChatToFolder } from '@/lib/actions/chat'
 import { getCurrentUserId } from '@/lib/auth/get-current-user'
 
-interface RouteParams {
-  params: {
-    id: string
-  }
-}
-
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const userId = await getCurrentUserId()
     if (!userId) {

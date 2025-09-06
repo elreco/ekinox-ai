@@ -378,7 +378,7 @@ export function ChatPanel({
     <div
       className={cn(
         'w-full bg-background group/form-container shrink-0',
-        messages.length > 0 ? 'sticky bottom-0 px-2 pb-4' : 'px-6'
+        messages.length > 0 ? 'sticky bottom-0 px-2 pb-4' : 'px-2 sm:px-6'
       )}
     >
       {messages.length === 0 && (
@@ -390,7 +390,7 @@ export function ChatPanel({
       )}
       <form
         onSubmit={handleFormSubmit}
-        className={cn('max-w-3xl w-full mx-auto relative')}
+        className={cn('w-full mx-auto relative', messages.length > 0 ? 'max-w-3xl' : 'max-w-full sm:max-w-3xl')}
       >
         {/* Scroll to bottom button - only shown when showScrollToBottomButton is true */}
         {showScrollToBottomButton && messages.length > 0 && (
@@ -459,8 +459,8 @@ export function ChatPanel({
           />
 
           {/* Bottom menu area */}
-          <div className="flex items-center justify-between p-3">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between p-2 sm:p-3 overflow-hidden">
+            <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
               <FileUpload
                 onFilesChange={files => {
                   setAttachedFiles(files)
@@ -501,10 +501,14 @@ export function ChatPanel({
                 onTranscript={handleVoiceTranscript}
                 disabled={isLoading || isToolInvocationInProgress()}
               />
-              <ModelSelector models={models || []} />
-              <SearchModeToggle />
+              <div className="flex-shrink-0">
+                <ModelSelector models={models || []} />
+              </div>
+              <div className="flex-shrink-0">
+                <SearchModeToggle />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
               {messages.length > 0 && (
                 <Button
                   variant="outline"

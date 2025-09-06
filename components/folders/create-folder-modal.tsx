@@ -1,7 +1,8 @@
 'use client'
 
-import { Plus } from 'lucide-react'
 import { useState, useTransition } from 'react'
+
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'

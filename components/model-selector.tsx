@@ -1,8 +1,8 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import * as FaIcons from 'react-icons/fa'
-import Link from 'next/link'
 
 import { Check, ChevronsUpDown, Crown, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
@@ -16,11 +16,11 @@ import { createModelId } from '../lib/utils'
 
 import { Button } from './ui/button'
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandItem,
-  CommandList
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandItem,
+    CommandList
 } from './ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 
@@ -99,7 +99,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="text-sm rounded-full shadow-none focus:ring-0"
+          className="text-sm rounded-full shadow-none focus:ring-0 min-w-0"
         >
           {selectedModel ? (
             <div className="flex items-center space-x-1">
@@ -116,7 +116,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                   )
                 )
               })()}
-              <span className="text-xs font-medium">{selectedModel.name}</span>
+              <span className="text-xs font-medium truncate">{selectedModel.name}</span>
               {isReasoningModel(selectedModel.id) && (
                 <Lightbulb size={12} className="text-accent-blue-foreground" />
               )}

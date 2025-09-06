@@ -9,8 +9,16 @@ export function createQuestionTool(fullModel: string) {
   return tool({
     description:
       'Ask a clarifying question with multiple options when more information is needed',
-    parameters: getQuestionSchemaForModel(fullModel)
-    // execute function removed to enable frontend confirmation
+    parameters: getQuestionSchemaForModel(fullModel),
+    execute: async params => {
+      return {
+        question: params.question,
+        options: params.options || [],
+        allowsInput: params.allowsInput || false,
+        inputLabel: params.inputLabel,
+        inputPlaceholder: params.inputPlaceholder
+      }
+    }
   })
 }
 

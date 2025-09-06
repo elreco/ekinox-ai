@@ -1,5 +1,6 @@
-import { nanoid } from 'nanoid'
 import { NextRequest, NextResponse } from 'next/server'
+
+import { nanoid } from 'nanoid'
 
 import {
   createDefaultFolder,

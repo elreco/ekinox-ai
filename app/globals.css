@@ -112,4 +112,9 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevent horizontal scroll while preserving content visibility */
+  html {
+    overflow-x: hidden;
+  }
 }
