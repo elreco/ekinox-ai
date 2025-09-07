@@ -18,6 +18,7 @@ interface MessageActionsProps {
   chatId?: string
   enableShare?: boolean
   className?: string
+  isSharePage?: boolean
 }
 
 export function MessageActions({
@@ -26,7 +27,8 @@ export function MessageActions({
   reload,
   chatId,
   enableShare,
-  className
+  className,
+  isSharePage = false
 }: MessageActionsProps) {
   const { status } = useChat({
     id: CHAT_ID
@@ -46,7 +48,9 @@ export function MessageActions({
         className
       )}
     >
-      {reload && <RetryButton reload={reload} messageId={messageId} />}
+      {reload && !isSharePage && (
+        <RetryButton reload={reload} messageId={messageId} />
+      )}
       <Button
         variant="ghost"
         size="icon"

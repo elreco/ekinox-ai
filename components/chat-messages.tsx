@@ -31,6 +31,7 @@ interface ChatMessagesProps {
     messageId: string,
     options?: ChatRequestOptions
   ) => Promise<string | null | undefined>
+  isSharePage?: boolean
 }
 
 export function ChatMessages({
@@ -42,7 +43,8 @@ export function ChatMessages({
   addToolResult,
   scrollContainerRef,
   onUpdateMessage,
-  reload
+  reload,
+  isSharePage = false
 }: ChatMessagesProps) {
   const [openStates, setOpenStates] = useState<Record<string, boolean>>({})
   const manualToolCallId = 'manual-tool-call'
@@ -152,6 +154,7 @@ export function ChatMessages({
                 addToolResult={addToolResult}
                 onUpdateMessage={onUpdateMessage}
                 reload={reload}
+                isSharePage={isSharePage}
               />
               {showLoading && <Spinner />}
             </div>
@@ -169,6 +172,7 @@ export function ChatMessages({
                   addToolResult={addToolResult}
                   onUpdateMessage={onUpdateMessage}
                   reload={reload}
+                  isSharePage={isSharePage}
                 />
               </div>
             ))}

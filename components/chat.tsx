@@ -27,13 +27,15 @@ export function Chat({
   savedMessages = [],
   query,
   models,
-  suggestions
+  suggestions,
+  isSharePage = false
 }: {
   id: string
   savedMessages?: Message[]
   query?: string
   models?: Model[]
   suggestions?: SuggestionItem[]
+  isSharePage?: boolean
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -253,22 +255,25 @@ export function Chat({
         scrollContainerRef={scrollContainerRef}
         onUpdateMessage={handleUpdateAndReloadMessage}
         reload={handleReloadFrom}
+        isSharePage={isSharePage}
       />
-      <ChatPanel
-        input={input}
-        handleInputChange={handleInputChange}
-        handleSubmit={onSubmit}
-        isLoading={isLoading}
-        messages={messages}
-        setMessages={setMessages}
-        stop={stop}
-        query={query}
-        append={append}
-        models={models}
-        suggestions={suggestions}
-        showScrollToBottomButton={!isAtBottom}
-        scrollContainerRef={scrollContainerRef}
-      />
+      {!isSharePage && (
+        <ChatPanel
+          input={input}
+          handleInputChange={handleInputChange}
+          handleSubmit={onSubmit}
+          isLoading={isLoading}
+          messages={messages}
+          setMessages={setMessages}
+          stop={stop}
+          query={query}
+          append={append}
+          models={models}
+          suggestions={suggestions}
+          showScrollToBottomButton={!isAtBottom}
+          scrollContainerRef={scrollContainerRef}
+        />
+      )}
     </div>
   )
 }

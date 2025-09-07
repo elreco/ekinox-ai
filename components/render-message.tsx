@@ -21,6 +21,7 @@ interface RenderMessageProps {
     messageId: string,
     options?: ChatRequestOptions
   ) => Promise<string | null | undefined>
+  isSharePage?: boolean
 }
 
 export function RenderMessage({
@@ -32,7 +33,8 @@ export function RenderMessage({
   chatId,
   addToolResult,
   onUpdateMessage,
-  reload
+  reload,
+  isSharePage = false
 }: RenderMessageProps) {
   const relatedQuestions = useMemo(
     () =>
@@ -178,6 +180,7 @@ export function RenderMessage({
                 showActions={isLastPart}
                 messageId={messageId}
                 reload={reload}
+                isSharePage={isSharePage}
               />
             )
           case 'reasoning':
@@ -197,7 +200,7 @@ export function RenderMessage({
             return null
         }
       })}
-      {relatedQuestions && relatedQuestions.length > 0 && (
+      {relatedQuestions && relatedQuestions.length > 0 && !isSharePage && (
         <RelatedQuestions
           annotations={relatedQuestions as JSONValue[]}
           onQuerySelect={onQuerySelect}
