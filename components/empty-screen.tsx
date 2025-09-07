@@ -14,7 +14,7 @@ export function EmptyScreen({
   suggestions?: SuggestionItem[]
 }) {
   return (
-    <div className={`mx-auto w-full transition-all ${className}`}>
+    <div className={`mx-auto w-full max-w-3xl transition-all ${className}`}>
       <div className="bg-transparent p-2">
         <div className="mt-2 flex flex-col items-start space-y-2 mb-4">
           {suggestions &&
@@ -22,14 +22,17 @@ export function EmptyScreen({
               <Button
                 key={index}
                 variant="link"
-                className="h-auto p-0 text-base text-foreground"
+                className="h-auto p-0 text-base text-foreground whitespace-normal text-left justify-start"
                 name={suggestion.message}
                 onClick={async () => {
                   submitMessage(suggestion.message)
                 }}
               >
-                <ArrowRight size={16} className="mr-2 text-muted-foreground" />
-                {suggestion.heading}
+                <ArrowRight
+                  size={16}
+                  className="mr-2 text-muted-foreground flex-shrink-0"
+                />
+                <span className="break-words">{suggestion.heading}</span>
               </Button>
             ))}
         </div>
