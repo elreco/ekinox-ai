@@ -174,7 +174,8 @@ export function FolderMenu({
               <AlertDialogTitle>Delete Folder</AlertDialogTitle>
               <AlertDialogDescription className="space-y-2">
                 <p>
-                  Are you sure you want to delete the folder &quot;{folderName}&quot;?
+                  Are you sure you want to delete the folder &quot;{folderName}
+                  &quot;?
                 </p>
                 <p className="text-sm text-muted-foreground">
                   <strong>Note:</strong> This will only delete the folder
@@ -228,7 +229,10 @@ export function FolderMenu({
                     All {chatCount} chat{chatCount > 1 ? 's' : ''} will be moved
                     to &quot;Uncategorized&quot;
                   </li>
-                  <li>The folder &quot;{folderName}&quot; will be permanently deleted</li>
+                  <li>
+                    The folder &quot;{folderName}&quot; will be permanently
+                    deleted
+                  </li>
                   <li>Your chats will remain safe and accessible</li>
                 </ul>
                 <p className="text-sm font-medium text-destructive">

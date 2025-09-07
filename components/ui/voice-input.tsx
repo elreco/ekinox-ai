@@ -58,6 +58,8 @@ export function VoiceInput({
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   const isListeningRef = useRef(false)
   const canStartRef = useRef(true)
+  const isMobileRef = useRef(false)
+  const isSafariRef = useRef(false)
 
   // Sync ref with state
   useEffect(() => {
@@ -75,7 +77,12 @@ export function VoiceInput({
       recognitionRef.current = new SpeechRecognition()
 
       const recognition = recognitionRef.current
-      recognition.continuous = true
+      // Detect Safari mobile
+      isMobileRef.current = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      isSafariRef.current = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent)
+
+      // Safari mobile doesn't handle continuous mode well
+      recognition.continuous = !(isMobileRef.current && isSafariRef.current)
       recognition.interimResults = true
       recognition.lang = navigator.language || 'en-US'
 
@@ -87,9 +94,11 @@ export function VoiceInput({
 
       recognition.onend = () => {
         console.log('🎤 Speech recognition ended')
+        const wasListening = isListeningRef.current
         isListeningRef.current = false
         setIsListening(false)
-        // Allow immediate restart when recognition ends naturally
+
+        // Allow restart
         setTimeout(() => {
           canStartRef.current = true
         }, 100)
@@ -106,6 +115,8 @@ export function VoiceInput({
       }
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
+        console.log('🎤 Speech recognition result received', event)
+
         // Don't process results if we're not supposed to be listening
         if (!isListeningRef.current) {
           console.log('🎤 Ignoring speech result - not listening')
@@ -129,8 +140,24 @@ export function VoiceInput({
           }
         }
 
-        if (finalTranscript && isListeningRef.current) {
-          onTranscript(finalTranscript)
+        console.log('🎤 Final transcript:', finalTranscript)
+        console.log('🎤 Interim transcript:', interimTranscript)
+
+        // For Safari mobile, also accept interim results if final is empty
+        const transcriptToSend = finalTranscript || (isMobileRef.current && isSafariRef.current ? interimTranscript : '')
+
+        if (transcriptToSend && isListeningRef.current) {
+          console.log('🎤 Sending transcript:', transcriptToSend)
+          onTranscript(transcriptToSend)
+
+          // For Safari mobile, stop listening after getting a result
+          if (isMobileRef.current && isSafariRef.current) {
+            setTimeout(() => {
+              if (recognitionRef.current && isListeningRef.current) {
+                recognitionRef.current.stop()
+              }
+            }, 500)
+          }
         }
       }
 
@@ -192,8 +219,8 @@ export function VoiceInput({
     console.log('🎤 Starting speech recognition...')
 
     try {
-      // Reset continuous mode for new session
-      recognitionRef.current.continuous = true
+      // Set continuous mode based on browser
+      recognitionRef.current.continuous = !(isMobileRef.current && isSafariRef.current)
 
       // Update refs first to prevent double calls
       isListeningRef.current = true
@@ -202,7 +229,9 @@ export function VoiceInput({
 
       recognitionRef.current.start()
       toast.success('Listening...', {
-        description: 'Speak clearly into your microphone.'
+        description: isMobileRef.current && isSafariRef.current
+          ? 'Speak clearly and briefly.'
+          : 'Speak clearly into your microphone.'
       })
     } catch (error) {
       console.error('Failed to start speech recognition:', error)
@@ -272,7 +301,7 @@ export function VoiceInput({
       onClick={handleClick}
       disabled={disabled}
       className={cn(
-        'p-2 h-8 w-8',
+        'p-1 sm:p-2 h-7 w-7 sm:h-8 sm:w-8',
         isListening && 'text-red-500 animate-pulse',
         className
       )}
@@ -283,9 +312,9 @@ export function VoiceInput({
       }
     >
       {isListening ? (
-        <MicOff className="h-4 w-4" />
+        <MicOff className="h-3 w-3 sm:h-4 sm:w-4" />
       ) : (
-        <Mic className="h-4 w-4" />
+        <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
       )}
       <span className="sr-only">
         {isListening ? 'Stop voice input' : 'Start voice input'}

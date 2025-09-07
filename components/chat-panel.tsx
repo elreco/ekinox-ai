@@ -378,7 +378,9 @@ export function ChatPanel({
     <div
       className={cn(
         'w-full bg-background group/form-container shrink-0',
-        messages.length > 0 ? 'sticky bottom-0 px-2 pb-4' : 'px-2 sm:px-6'
+        messages.length > 0
+          ? 'sticky bottom-0 px-1 sm:px-2 pb-4'
+          : 'px-1 sm:px-6'
       )}
     >
       {messages.length === 0 && (
@@ -390,7 +392,7 @@ export function ChatPanel({
       )}
       <form
         onSubmit={handleFormSubmit}
-        className={cn('w-full mx-auto relative', messages.length > 0 ? 'max-w-3xl' : 'max-w-full sm:max-w-3xl')}
+        className={cn('w-full mx-auto relative max-w-3xl')}
       >
         {/* Scroll to bottom button - only shown when showScrollToBottomButton is true */}
         {showScrollToBottomButton && messages.length > 0 && (
@@ -459,8 +461,8 @@ export function ChatPanel({
           />
 
           {/* Bottom menu area */}
-          <div className="flex items-center justify-between p-2 sm:p-3 overflow-hidden">
-            <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden">
+          <div className="flex items-center justify-between p-1 sm:p-3 overflow-hidden">
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-1 min-w-0 overflow-hidden">
               <FileUpload
                 onFilesChange={files => {
                   setAttachedFiles(files)
@@ -508,31 +510,38 @@ export function ChatPanel({
                 <SearchModeToggle />
               </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0 ml-1 sm:ml-2">
               {messages.length > 0 && (
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={handleNewChat}
-                  className="shrink-0 rounded-full group"
+                  className="shrink-0 rounded-full group h-7 w-7 sm:h-9 sm:w-9"
                   type="button"
                   disabled={isLoading || isToolInvocationInProgress()}
                 >
-                  <MessageCirclePlus className="size-4 group-hover:rotate-12 transition-all" />
+                  <MessageCirclePlus className="size-3 sm:size-4 group-hover:rotate-12 transition-all" />
                 </Button>
               )}
               <Button
                 type={isLoading ? 'button' : 'submit'}
                 size={'icon'}
                 variant={'outline'}
-                className={cn(isLoading && 'animate-pulse', 'rounded-full')}
+                className={cn(
+                  isLoading && 'animate-pulse',
+                  'rounded-full h-7 w-7 sm:h-9 sm:w-9'
+                )}
                 disabled={
                   (input.length === 0 && !isLoading) ||
                   isToolInvocationInProgress()
                 }
                 onClick={isLoading ? stop : undefined}
               >
-                {isLoading ? <Square size={20} /> : <ArrowUp size={20} />}
+                {isLoading ? (
+                  <Square className="size-3 sm:size-5" />
+                ) : (
+                  <ArrowUp className="size-3 sm:size-5" />
+                )}
               </Button>
             </div>
           </div>
