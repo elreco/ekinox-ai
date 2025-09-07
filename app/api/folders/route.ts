@@ -47,10 +47,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    const folder: Omit<Folder, 'createdAt' | 'updatedAt'> = {
+    const folder: Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'> = {
       id: nanoid(),
       name: name.trim(),
-      userId,
       color: color || '#6B7280',
       description: description || undefined
     }

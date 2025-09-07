@@ -3,7 +3,7 @@ import { PricingSection } from '@/components/pricing/pricing-section'
 export default function PricingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pt-16 sm:pt-20">
         <PricingSection />
       </div>
     </div>

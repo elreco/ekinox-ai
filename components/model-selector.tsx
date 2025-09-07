@@ -99,7 +99,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="text-xs sm:text-sm rounded-full shadow-none focus:ring-0 min-w-0 px-2 py-1 sm:px-3 sm:py-2 h-7 sm:h-auto"
+          className="text-xs sm:text-sm rounded-full shadow-none focus:ring-0 min-w-0 px-3 py-2 sm:px-3 sm:py-2 h-9 sm:h-auto"
         >
           {selectedModel ? (
             <div className="flex items-center space-x-1">
@@ -110,7 +110,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
                 return (
                   IconComponent && (
                     <IconComponent
-                      className="h-3 w-3 sm:h-4 sm:w-4"
+                      className="h-4 w-4 sm:h-4 sm:w-4"
                       style={{ color: selectedModel.color || '#6B7280' }}
                     />
                   )
@@ -121,7 +121,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
               </span>
               {isReasoningModel(selectedModel.id) && (
                 <Lightbulb
-                  size={10}
+                  size={12}
                   className="sm:size-3 text-accent-blue-foreground"
                 />
               )}
@@ -129,7 +129,7 @@ export function ModelSelector({ models }: ModelSelectorProps) {
           ) : (
             'Select model'
           )}
-          <ChevronsUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-1 sm:ml-2 h-4 w-4 sm:h-4 sm:w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-2" align="start">

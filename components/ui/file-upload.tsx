@@ -390,7 +390,7 @@ export function FileUpload({
         size="sm"
         onClick={handleButtonClick}
         className={cn(
-          'p-1 sm:p-2 h-7 w-7 sm:h-8 sm:w-8',
+          'p-2 sm:p-2 h-9 w-9 sm:h-8 sm:w-8',
           currentFiles.length >= maxFiles && 'opacity-50 cursor-not-allowed'
         )}
         disabled={currentFiles.length >= maxFiles}
@@ -400,7 +400,7 @@ export function FileUpload({
             : `Attach files (${currentFiles.length}/${maxFiles})\nSupported: Images, Documents, Code files\nMax size: ${Math.round(maxSize / 1024 / 1024)}MB`
         }
       >
-        <Paperclip className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Paperclip className="h-4 w-4 sm:h-4 sm:w-4" />
         <span className="sr-only">Attach files</span>
       </Button>
 

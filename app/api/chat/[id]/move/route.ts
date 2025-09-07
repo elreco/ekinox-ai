@@ -5,7 +5,7 @@ import { getCurrentUserId } from '@/lib/auth/get-current-user'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await getCurrentUserId()
@@ -15,7 +15,7 @@ export async function PATCH(
 
     const { folderId } = await request.json()
 
-    const result = await moveChatToFolder(params.id, folderId, userId)
+    const result = await moveChatToFolder((await params).id, folderId, userId)
 
     if (result.error) {
       const statusCode =

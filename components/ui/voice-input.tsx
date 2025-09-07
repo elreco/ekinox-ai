@@ -78,8 +78,12 @@ export function VoiceInput({
 
       const recognition = recognitionRef.current
       // Detect Safari mobile
-      isMobileRef.current = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      isSafariRef.current = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent)
+      isMobileRef.current = /iPhone|iPad|iPod|Android/i.test(
+        navigator.userAgent
+      )
+      isSafariRef.current =
+        /Safari/i.test(navigator.userAgent) &&
+        !/Chrome/i.test(navigator.userAgent)
 
       // Safari mobile doesn't handle continuous mode well
       recognition.continuous = !(isMobileRef.current && isSafariRef.current)
@@ -144,7 +148,9 @@ export function VoiceInput({
         console.log('🎤 Interim transcript:', interimTranscript)
 
         // For Safari mobile, also accept interim results if final is empty
-        const transcriptToSend = finalTranscript || (isMobileRef.current && isSafariRef.current ? interimTranscript : '')
+        const transcriptToSend =
+          finalTranscript ||
+          (isMobileRef.current && isSafariRef.current ? interimTranscript : '')
 
         if (transcriptToSend && isListeningRef.current) {
           console.log('🎤 Sending transcript:', transcriptToSend)
@@ -220,7 +226,9 @@ export function VoiceInput({
 
     try {
       // Set continuous mode based on browser
-      recognitionRef.current.continuous = !(isMobileRef.current && isSafariRef.current)
+      recognitionRef.current.continuous = !(
+        isMobileRef.current && isSafariRef.current
+      )
 
       // Update refs first to prevent double calls
       isListeningRef.current = true
@@ -229,9 +237,10 @@ export function VoiceInput({
 
       recognitionRef.current.start()
       toast.success('Listening...', {
-        description: isMobileRef.current && isSafariRef.current
-          ? 'Speak clearly and briefly.'
-          : 'Speak clearly into your microphone.'
+        description:
+          isMobileRef.current && isSafariRef.current
+            ? 'Speak clearly and briefly.'
+            : 'Speak clearly into your microphone.'
       })
     } catch (error) {
       console.error('Failed to start speech recognition:', error)
@@ -301,7 +310,7 @@ export function VoiceInput({
       onClick={handleClick}
       disabled={disabled}
       className={cn(
-        'p-1 sm:p-2 h-7 w-7 sm:h-8 sm:w-8',
+        'p-2 sm:p-2 h-9 w-9 sm:h-8 sm:w-8',
         isListening && 'text-red-500 animate-pulse',
         className
       )}
@@ -312,9 +321,9 @@ export function VoiceInput({
       }
     >
       {isListening ? (
-        <MicOff className="h-3 w-3 sm:h-4 sm:w-4" />
+        <MicOff className="h-4 w-4 sm:h-4 sm:w-4" />
       ) : (
-        <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
+        <Mic className="h-4 w-4 sm:h-4 sm:w-4" />
       )}
       <span className="sr-only">
         {isListening ? 'Stop voice input' : 'Start voice input'}

@@ -391,7 +391,7 @@ export function DiscoverPage({ media, userCountry }: DiscoverPageProps) {
       <div className="min-h-screen">
         {/* Enhanced Hero Section */}
         <div className="border-b bg-gradient-to-br from-background via-background to-muted/20">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 py-16 pt-20 sm:pt-24 sm:px-6 lg:px-8">
             <div className="text-center">
               <div className="flex justify-center mb-6">
                 <div className="flex items-center space-x-2 rounded-full bg-primary/10 px-6 py-3">

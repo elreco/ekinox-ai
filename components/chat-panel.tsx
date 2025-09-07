@@ -516,11 +516,11 @@ export function ChatPanel({
                   variant="outline"
                   size="icon"
                   onClick={handleNewChat}
-                  className="shrink-0 rounded-full group h-7 w-7 sm:h-9 sm:w-9"
+                  className="shrink-0 rounded-full group h-9 w-9 sm:h-9 sm:w-9"
                   type="button"
                   disabled={isLoading || isToolInvocationInProgress()}
                 >
-                  <MessageCirclePlus className="size-3 sm:size-4 group-hover:rotate-12 transition-all" />
+                  <MessageCirclePlus className="size-4 sm:size-4 group-hover:rotate-12 transition-all" />
                 </Button>
               )}
               <Button
@@ -529,7 +529,7 @@ export function ChatPanel({
                 variant={'outline'}
                 className={cn(
                   isLoading && 'animate-pulse',
-                  'rounded-full h-7 w-7 sm:h-9 sm:w-9'
+                  'rounded-full h-9 w-9 sm:h-9 sm:w-9'
                 )}
                 disabled={
                   (input.length === 0 && !isLoading) ||
@@ -538,9 +538,9 @@ export function ChatPanel({
                 onClick={isLoading ? stop : undefined}
               >
                 {isLoading ? (
-                  <Square className="size-3 sm:size-5" />
+                  <Square className="size-4 sm:size-5" />
                 ) : (
-                  <ArrowUp className="size-3 sm:size-5" />
+                  <ArrowUp className="size-4 sm:size-5" />
                 )}
               </Button>
             </div>

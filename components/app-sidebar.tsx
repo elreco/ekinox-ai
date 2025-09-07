@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 
 import { User } from '@supabase/supabase-js'
-import { Plus, Search } from 'lucide-react'
+import { Plus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -38,13 +38,13 @@ export default function AppSidebar({ user }: AppSidebarProps) {
         </Link>
         <SidebarTrigger />
       </SidebarHeader>
-      <SidebarContent className="flex flex-col px-2 py-4 h-full">
+      <SidebarContent className="flex flex-col px-2 py-4 h-full overflow-x-hidden">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/" className="flex items-center gap-2">
-                <Plus className="size-4" />
-                <span>New</span>
+              <Link href="/" className="flex items-center gap-2 min-w-0">
+                <Plus className="size-4 flex-shrink-0" />
+                <span className="truncate">New</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -57,7 +57,7 @@ export default function AppSidebar({ user }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem> */}
         </SidebarMenu>
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
           <Suspense fallback={<ChatHistorySkeleton />}>
             <ChatHistorySection />
           </Suspense>

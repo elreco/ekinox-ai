@@ -81,7 +81,7 @@ export async function getFolder(
 }
 
 export async function createFolder(
-  folder: Omit<Folder, 'createdAt' | 'updatedAt'>,
+  folder: Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'>,
   userId: string
 ): Promise<Folder | null> {
   try {
@@ -89,7 +89,10 @@ export async function createFolder(
     const now = new Date()
 
     const folderToSave: Folder = {
-      ...folder,
+      id: folder.id,
+      name: folder.name,
+      color: folder.color,
+      description: folder.description,
       createdAt: now,
       updatedAt: now,
       userId
@@ -219,10 +222,9 @@ export async function getChatsInFolder(folderId: string, userId: string) {
 export async function createDefaultFolder(
   userId: string
 ): Promise<Folder | null> {
-  const defaultFolder: Omit<Folder, 'createdAt' | 'updatedAt'> = {
+  const defaultFolder: Omit<Folder, 'createdAt' | 'updatedAt' | 'userId'> = {
     id: `default-${userId}`,
     name: 'General',
-    userId,
     color: '#6B7280'
   }
 

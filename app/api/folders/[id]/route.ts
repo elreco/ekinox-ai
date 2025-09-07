@@ -9,9 +9,9 @@ import {
 import { getCurrentUserId } from '@/lib/auth/get-current-user'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const folder = await getFolder(params.id, userId)
+    const folder = await getFolder((await params).id, userId)
     if (!folder) {
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
     }
@@ -58,7 +58,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (color !== undefined) updateData.color = color
     if (description !== undefined) updateData.description = description
 
-    const updatedFolder = await updateFolder(params.id, updateData, userId)
+    const updatedFolder = await updateFolder(
+      (await params).id,
+      updateData,
+      userId
+    )
 
     if (!updatedFolder) {
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 })
@@ -81,7 +85,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const chatsInFolder = await getChatsInFolder(params.id, userId)
+    const chatsInFolder = await getChatsInFolder((await params).id, userId)
     if (chatsInFolder.length > 0) {
       return NextResponse.json(
         {
@@ -92,7 +96,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const result = await deleteFolder(params.id, userId)
+    const result = await deleteFolder((await params).id, userId)
 
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 404 })
